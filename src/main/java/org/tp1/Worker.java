@@ -6,13 +6,15 @@ public class Worker {
     private final int id;
     private final Role role;
     private float salary;
+    private final Contact contact;
 
 
-    public Worker(String name, Role role, float salary) {
+    public Worker(String name, Role role, float salary, Contact contact) {
         this.id = ++count;
         this.name = name;
         this.role = role;
         this.salary = salary;
+        this.contact = contact;
     }
 
 
@@ -32,12 +34,17 @@ public class Worker {
         return salary;
     }
 
+    public Contact getContact() {
+        return contact;
+    }
+
     public void setSalary(float salary) {
         this.salary = salary;
     }
 
     public void print() {
-        System.out.println("Worker [id=" + id + ", name=" + name + ", role=" + role + ", salary=" + salary + "]");
+//        System.out.println("Worker [id=" + id + ", name=" + name + ", role=" + role + ", salary=" + salary + "]");
+        System.out.println("Worker [id=" + id + ", name=" + name + ", role=" + role + ", salary=" + salary + ", contact=" + contact + "]");
     }
 
 }
