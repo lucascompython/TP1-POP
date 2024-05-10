@@ -1,1 +1,1 @@
-./gradlew run -q --console=plain
+./gradlew.bat run -q --console=plain
