@@ -1,6 +1,6 @@
 package org.tp1;
 
-public class Worker {
+public final class Worker {
     public static int count = 0;
     private final String name;
     private final int id;
@@ -43,7 +43,6 @@ public class Worker {
     }
 
     public void print() {
-//        System.out.println("Worker [id=" + id + ", name=" + name + ", role=" + role + ", salary=" + salary + "]");
         System.out.println("Worker [id=" + id + ", name=" + name + ", role=" + role + ", salary=" + salary + ", contact=" + contact + "]");
     }
 

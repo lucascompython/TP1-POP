@@ -1,6 +1,6 @@
 package org.tp1;
 
-public class Client {
+public final class Client {
     public static int count = 0;
     private final String name;
     private final int id;
