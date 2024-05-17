@@ -67,4 +67,11 @@ LD_LIBRARY_LOAD="." ./TP1
 
 # Windows
 ./run.ps1
+
+# Release build
+
+# Linux
+./run.sh --release
+# Windows
+./run.ps1 -release
 ```
