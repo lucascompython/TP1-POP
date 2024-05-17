@@ -111,6 +111,6 @@ pub extern "C" fn read_key() -> u8 {
 
     match event {
         crossterm::event::Event::Key(key_event) => convert_key_u8(key_event.code),
-        _ => 0,
+        _ => read_key(), // Ignore other events and try again
     }
 }

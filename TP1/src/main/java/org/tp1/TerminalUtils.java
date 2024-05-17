@@ -8,7 +8,7 @@ import java.lang.foreign.MemorySegment;
 
 public final class TerminalUtils implements AutoCloseable {
 
-    public TerminalUtils () {
+    public TerminalUtils() {
         enable_raw_mode();
         enter_alternate_screen();
         hideCursor();
@@ -45,21 +45,21 @@ public final class TerminalUtils implements AutoCloseable {
 
     public TerminalSize getTerminalSize() {
         try (var arena = Arena.ofConfined()) {
-            MemorySegment terminalSize = TermSize.reinterpret(get_terminal_size(), arena, bindings_h::free_terminal_size);
+            MemorySegment terminalSize = TermSize.reinterpret(get_terminal_size(), arena,
+                    bindings_h::free_terminal_size);
 
             return new TerminalSize(
                     TermSize.rows(terminalSize),
-                    TermSize.cols(terminalSize)
-            );
+                    TermSize.cols(terminalSize));
         }
     }
 
-//    public void writeString(String str) {
-//        try (var arena = Arena.ofConfined()) {
-//            var strSegment = arena.allocateFrom(str);
-//            write_string(strSegment, strSegment.byteSize());
-//        }
-//    }
+    // public void writeString(String str) {
+    // try (var arena = Arena.ofConfined()) {
+    // var strSegment = arena.allocateFrom(str);
+    // write_string(strSegment, strSegment.byteSize());
+    // }
+    // }
 
     public void print(String str) {
         System.out.print(str);
