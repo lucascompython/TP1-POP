@@ -29,7 +29,7 @@ cd jextract
 
 ```bash
 cd terminal_utils
-cargo build --releaase
+cargo build --release
 ```
 
 - Compilar código em Java
