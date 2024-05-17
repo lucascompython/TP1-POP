@@ -9,8 +9,6 @@ cd ../TP1
 cp ../terminal_utils/target/release/terminal_utils build/install/TP1/bin
 
 cd build/install/TP1/bin
-
 LD_LIBRARY_PATH="." ./TP1
-./TP1
 
 cd ../../../../../

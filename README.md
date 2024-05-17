@@ -58,3 +58,13 @@ LD_LIBRARY_LOAD="." ./TP1
 # Windows 
 ./TP1
 ```
+
+- Ou então rodar o script `run.sh` ou `run.ps1` para compilar e rodar o programa. É preciso fazer o setup do Jextract antes de rodar o script.
+
+```bash
+# Linux
+./run.sh
+
+# Windows
+./run.ps1
+```
