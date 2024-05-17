@@ -2,12 +2,12 @@
 
 ## TUI
 
-Para fazer uma interface decente, tive que usar uma linguagem de baixo nivel para conseguir acesso total ao terminal. Neste caso usei Rust. Desenvolvi uma  pequena livraria para dar o acesso necessario ao Java.
+Para fazer uma interface decente, tive que usar uma linguagem de baixo nivel para conseguir acesso total ao terminal. Neste caso usei Rust. Desenvolvi uma  pequena biblioteca para dar o acesso necessario ao Java.
 
-A livraria em Rust "comunica" com a JVM usando o API [FFM](https://openjdk.org/jeps/454) introduzido no JDK 22.
+A biblioteca em Rust "comunica" com a JVM usando o API [FFM](https://openjdk.org/jeps/454) introduzido no JDK 22.
 
 Usei tambem a ferramenta [Jextract](https://jdk.java.net/jextract/) para gerar automaticamente "bindings" em Java ao ler um header em C. O Jextract roda a cada build (ver o [ficheiro de build do Gradle](/TP1/build.gradle.kts#L25)).  
-Para gerar esse header usei uma build-time dependency, [cbindgen](https://github.com/mozilla/cbindgen) para gerar automaticamente o header em C ao ler as funções e structs em Rust que são sujeitas a ser partilhadas. O header é gerado a cada build da livraria (ver o [ficheiro de build da livraria](/terminal_utils/build.rs))
+Para gerar esse header usei uma build-time dependency, [cbindgen](https://github.com/mozilla/cbindgen) para gerar automaticamente o header em C ao ler as funções e structs em Rust que são sujeitas a ser partilhadas. O header é gerado a cada build da biblioteca (ver o [ficheiro de build da biblioteca](/terminal_utils/build.rs))
 
 Ver diagrama a baixo.
 
@@ -25,7 +25,7 @@ cd jextract
 ./setup.ps1
 ```
 
-- Compilar a livraria em Rust
+- Compilar a biblioteca em Rust
 
 ```bash
 cd terminal_utils
