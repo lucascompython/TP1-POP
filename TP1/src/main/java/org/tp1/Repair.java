@@ -14,8 +14,8 @@ public final class Repair {
     private final LocalDateTime entryDate;
     private LocalDateTime exitDate;
 
-
-    public Repair(CarRegistration carRegistration, VehicleType vehicleType, int workerId, int clientId, String description, float price, LocalDateTime entryDate, LocalDateTime exitDate) {
+    public Repair(CarRegistration carRegistration, VehicleType vehicleType, int workerId, int clientId,
+            String description, float price, LocalDateTime entryDate, LocalDateTime exitDate) {
         this.id = ++count;
         this.carRegistration = carRegistration;
         this.vehicleType = vehicleType;
@@ -68,6 +68,8 @@ public final class Repair {
     }
 
     public void print() {
-        System.out.println("Repair [id=" + id + ", carRegistration=" + carRegistration + ", vehicleType=" + vehicleType + ", workerId=" + workerId + ", clientId=" + clientId + ", description=" + description + ", price=" + price + ", entryDate=" + entryDate + ", exitDate=" + exitDate + "]");
+        System.out.println("Repair [id=" + id + ", carRegistration=" + carRegistration + ", vehicleType=" + vehicleType
+                + ", workerId=" + workerId + ", clientId=" + clientId + ", description=" + description + ", price="
+                + price + ", entryDate=" + entryDate + ", exitDate=" + exitDate + "]");
     }
 }

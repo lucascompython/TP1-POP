@@ -8,7 +8,6 @@ public final class Worker {
     private float salary;
     private final Contact contact;
 
-
     public Worker(String name, Role role, float salary, Contact contact) {
         this.id = ++count;
         this.name = name;
@@ -16,7 +15,6 @@ public final class Worker {
         this.salary = salary;
         this.contact = contact;
     }
-
 
     public String getName() {
         return name;
@@ -43,7 +41,8 @@ public final class Worker {
     }
 
     public void print() {
-        System.out.println("Worker [id=" + id + ", name=" + name + ", role=" + role + ", salary=" + salary + ", contact=" + contact + "]");
+        System.out.println("Worker [id=" + id + ", name=" + name + ", role=" + role + ", salary=" + salary
+                + ", contact=" + contact + "]");
     }
 
 }

@@ -7,7 +7,6 @@ public final class Client {
     private final NIF nif;
     private final Contact contact;
 
-
     public Client(String name, NIF nif, Contact contact) {
         this.id = ++count;
         this.name = name;
