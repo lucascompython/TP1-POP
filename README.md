@@ -43,7 +43,7 @@ cd TP1
 
 ```bash
 cd TP1/build/install/bin
-# Pode se copiar a libraria (ficheiro .dll no Windows e .so em Linux) para esta pasta
+# Pode se copiar a biblioteca (ficheiro .dll no Windows e .so em Linux) para esta pasta
 
 # Linux
 cp ../../../../../terminal_utils/target/release/libterminal_utils.so .
