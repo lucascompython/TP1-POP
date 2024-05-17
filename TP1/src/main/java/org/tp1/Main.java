@@ -1,8 +1,6 @@
 package org.tp1;
 
 import java.time.LocalDateTime;
-
-
 import static org.tp1.bindings.bindings_h.*;
 
 
