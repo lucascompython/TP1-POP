@@ -1,10 +1,7 @@
 #ifndef BINDINGS_H
 #define BINDINGS_H
 
-#include <stdarg.h>
-#include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
 
 void enable_raw_mode(void);
 
