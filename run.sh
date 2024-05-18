@@ -14,7 +14,7 @@ cargo build $CARGO_FLAG
 cd ../TP1
 ./gradlew installDist
 
-cp ../terminal_utils/target/$BUILD_TYPE/terminal_utils build/install/TP1/bin
+cp ../terminal_utils/target/$BUILD_TYPE/libterminal_utils.so build/install/TP1/bin
 
 cd build/install/TP1/bin
 LD_LIBRARY_PATH="." ./TP1
