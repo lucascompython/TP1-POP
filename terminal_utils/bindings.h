@@ -27,12 +27,12 @@ void hide_cursor(void);
 
 void show_cursor(void);
 
-void set_title(const uint8_t *title, uintptr_t len);
-
 struct TermSize *get_terminal_size(void);
 
 void free_terminal_size(struct TermSize *ptr);
 
 uint8_t read_key(void);
+
+void write_text(const uint8_t *text, uintptr_t len);
 
 #endif /* BINDINGS_H */

@@ -50,14 +50,6 @@ pub extern "C" fn show_cursor() {
     crossterm::execute!(std::io::stdout(), crossterm::cursor::Show).expect("Unable to show cursor");
 }
 
-#[no_mangle]
-pub extern "C" fn set_title(title: *const u8, len: usize) {
-    let title = unsafe { std::slice::from_raw_parts(title, len) };
-    let title = std::str::from_utf8(title).expect("Invalid UTF-8 title");
-    crossterm::execute!(std::io::stdout(), crossterm::terminal::SetTitle(title))
-        .expect("Unable to set title");
-}
-
 #[repr(C)]
 pub struct TermSize {
     pub rows: u16,
@@ -112,5 +104,20 @@ pub extern "C" fn read_key() -> u8 {
     match event {
         crossterm::event::Event::Key(key_event) => convert_key_u8(key_event.code),
         _ => read_key(), // Ignore other events and try again
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn write_text(text: *const u8, len: usize) {
+    let text = unsafe { std::slice::from_raw_parts(text, len) };
+    let text = std::str::from_utf8(text).expect("Invalid UTF-8 text");
+
+    for line in text.lines() {
+        crossterm::execute!(
+            std::io::stdout(),
+            crossterm::style::Print(line),
+            crossterm::cursor::MoveToNextLine(1)
+        )
+        .expect("Unable to print text");
     }
 }

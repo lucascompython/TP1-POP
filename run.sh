@@ -11,8 +11,16 @@ fi
 cd terminal_utils
 cargo build $CARGO_FLAG
 
+if [ $? -ne 0 ]; then
+    exit $?
+fi
+
 cd ../TP1
 ./gradlew installDist
+
+if [ $? -ne 0 ]; then
+    exit $?
+fi
 
 cp ../terminal_utils/target/$BUILD_TYPE/libterminal_utils.so build/install/TP1/bin
 

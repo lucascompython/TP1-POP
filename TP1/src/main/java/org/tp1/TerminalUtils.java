@@ -36,13 +36,6 @@ public final class TerminalUtils implements AutoCloseable {
         return read_key();
     }
 
-    public void setTitle(String title) {
-        try (var arena = Arena.ofConfined()) {
-            var titleSegment = arena.allocateFrom(title);
-            set_title(titleSegment, titleSegment.byteSize());
-        }
-    }
-
     public TerminalSize getTerminalSize() {
         try (var arena = Arena.ofConfined()) {
             MemorySegment terminalSize = TermSize.reinterpret(get_terminal_size(), arena,
@@ -54,19 +47,11 @@ public final class TerminalUtils implements AutoCloseable {
         }
     }
 
-    // public void writeString(String str) {
-    // try (var arena = Arena.ofConfined()) {
-    // var strSegment = arena.allocateFrom(str);
-    // write_string(strSegment, strSegment.byteSize());
-    // }
-    // }
-
     public void print(String str) {
-        System.out.print(str);
-    }
-
-    public void println(String str) {
-        System.out.println(str + "\r");
+        try (var arena = Arena.ofConfined()) {
+            var strSegment = arena.allocateFrom(str);
+            write_text(strSegment, strSegment.byteSize());
+        }
     }
 
     @Override

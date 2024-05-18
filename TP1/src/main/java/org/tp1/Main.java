@@ -12,16 +12,15 @@ public final class Main {
                 System.out.print("Goodbye!\n");
             } else {
                 var terminalSize = terminal.getTerminalSize();
-                terminal.setTitle("OLA");
 
-                terminal.println(
+                terminal.print(
                         "Terminal size: " + terminalSize.rows() + " rows, " + terminalSize.columns() + " cols");
-                terminal.println("You pressed: " + (char) key + " (" + key + ")");
+                terminal.print("You pressed: " + (char) key + " (" + key + ")");
 
                 // sleep 5 seconds
 
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
