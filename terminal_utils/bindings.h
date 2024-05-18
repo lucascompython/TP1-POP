@@ -6,11 +6,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-typedef struct TermSize {
-  uint16_t rows;
-  uint16_t cols;
-} TermSize;
-
 void enable_raw_mode(void);
 
 void disable_raw_mode(void);
@@ -27,14 +22,10 @@ void hide_cursor(void);
 
 void show_cursor(void);
 
-struct TermSize *get_terminal_size(void);
-
-void free_terminal_size(struct TermSize *ptr);
-
 uint8_t read_key(void);
 
 void write_text(const uint8_t *text, uintptr_t len);
 
-void write_centered_text(const uint8_t *text, uintptr_t len);
+void write_centered_text(const uint8_t *text, uintptr_t len, uint8_t color, uint8_t style);
 
 #endif /* BINDINGS_H */

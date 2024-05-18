@@ -7,6 +7,8 @@ use crossterm::terminal::{
 };
 use crossterm::{cursor, style, terminal};
 
+static mut TERM_SIZE: TermSize = TermSize { rows: 0, cols: 0 };
+
 macro_rules! print_lines {
     ($text:expr $(, $arg:expr)*) => {
         for line in $text.lines() {
@@ -19,6 +21,10 @@ macro_rules! print_lines {
             .expect("Unable to print text");
         }
     };
+}
+struct TermSize {
+    rows: u16,
+    cols: u16,
 }
 
 #[no_mangle]
@@ -33,6 +39,13 @@ pub extern "C" fn disable_raw_mode() {
 
 #[no_mangle]
 pub extern "C" fn enter_alternate_screen() {
+    let (cols, rows) = terminal::size().expect("Unable to get terminal size");
+
+    unsafe {
+        TERM_SIZE.rows = rows;
+        TERM_SIZE.cols = cols;
+    }
+
     crossterm::execute!(stdout(), terminal::EnterAlternateScreen)
         .expect("Unable to enter alternate screen");
 }
@@ -64,30 +77,7 @@ pub extern "C" fn show_cursor() {
     crossterm::execute!(stdout(), cursor::Show).expect("Unable to show cursor");
 }
 
-#[repr(C)]
-pub struct TermSize {
-    pub rows: u16,
-    pub cols: u16,
-}
-
-#[no_mangle]
-pub extern "C" fn get_terminal_size() -> *mut TermSize {
-    let (cols, rows) = terminal::size().expect("Unable to get terminal size");
-    let term_size = TermSize { rows, cols };
-
-    Box::into_raw(Box::new(term_size))
-}
-
-#[no_mangle]
-pub extern "C" fn free_terminal_size(ptr: *mut TermSize) {
-    if !ptr.is_null() {
-        unsafe {
-            drop(Box::from_raw(ptr));
-        }
-    }
-}
-
-fn convert_key_u8(key: KeyCode) -> u8 {
+fn convert_key_to_u8(key: KeyCode) -> u8 {
     match key {
         KeyCode::Backspace => 8,
         KeyCode::Enter => 13,
@@ -116,7 +106,7 @@ pub extern "C" fn read_key() -> u8 {
     let event = event::read().expect("Unable to read event");
 
     match event {
-        event::Event::Key(key_event) => convert_key_u8(key_event.code),
+        event::Event::Key(key_event) => convert_key_to_u8(key_event.code),
         _ => read_key(), // Ignore other events and try again
     }
 }
@@ -126,18 +116,72 @@ pub extern "C" fn write_text(text: *const u8, len: usize) {
     let text = unsafe { std::slice::from_raw_parts(text, len) };
     let text = from_utf8(text).expect("Invalid UTF-8 text");
 
-    print_lines!(text);
+    print_lines!(text, cursor::MoveToNextLine(1));
+}
+
+fn convert_u8_to_color(color: u8) -> style::Color {
+    match color {
+        0 => style::Color::Reset,
+        1 => style::Color::Black,
+        2 => style::Color::DarkGrey,
+        3 => style::Color::Red,
+        4 => style::Color::DarkRed,
+        5 => style::Color::Green,
+        6 => style::Color::DarkGreen,
+        7 => style::Color::Yellow,
+        8 => style::Color::DarkYellow,
+        9 => style::Color::Blue,
+        10 => style::Color::DarkBlue,
+        11 => style::Color::Magenta,
+        12 => style::Color::DarkMagenta,
+        13 => style::Color::Cyan,
+        14 => style::Color::DarkCyan,
+        15 => style::Color::White,
+        16 => style::Color::Grey,
+        _ => style::Color::Reset,
+    }
+}
+
+fn convert_u8_to_style(style: u8) -> style::Attribute {
+    match style {
+        0 => style::Attribute::Reset,
+        1 => style::Attribute::Bold,
+        2 => style::Attribute::Dim,
+        3 => style::Attribute::Italic,
+        4 => style::Attribute::Underlined,
+        _ => style::Attribute::Reset,
+    }
 }
 
 #[no_mangle]
-pub extern "C" fn write_centered_text(text: *const u8, len: usize) {
+pub extern "C" fn write_centered_text(text: *const u8, len: usize, color: u8, style: u8) {
     let text = unsafe { std::slice::from_raw_parts(text, len) };
     let text = from_utf8(text).expect("Invalid UTF-8 text");
 
-    let (cols, rows) = terminal::size().expect("Unable to get terminal size");
+    let y = unsafe { TERM_SIZE.rows / 2 };
+    let x = (unsafe { TERM_SIZE.cols } - text.len() as u16) / 2;
 
-    let y = rows / 2;
-    let x = (cols - text.len() as u16) / 2;
+    if color != 0 {
+        crossterm::execute!(
+            stdout(),
+            style::SetForegroundColor(convert_u8_to_color(color))
+        )
+        .expect("Unable to set color");
+    }
+
+    if style != 0 {
+        crossterm::execute!(stdout(), style::SetAttribute(convert_u8_to_style(style)))
+            .expect("Unable to set style");
+    }
 
     print_lines!(text, cursor::MoveTo(x, y));
+
+    if color != 0 {
+        crossterm::execute!(stdout(), style::ResetColor).expect("Unable to reset color");
+    }
+
+    if style != 0 {
+        crossterm::execute!(stdout(), style::SetAttribute(style::Attribute::Reset))
+            .expect("Unable to reset style");
+    }
 }

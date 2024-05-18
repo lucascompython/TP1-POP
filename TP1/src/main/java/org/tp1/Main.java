@@ -1,21 +1,22 @@
 package org.tp1;
 
+import org.tp1.TerminalUtils.Color;
+import org.tp1.TerminalUtils.Style;
+import org.tp1.TerminalUtils.Terminal;
+
 public final class Main {
     public static void main(String[] args) {
 
-        try (var terminal = new TerminalUtils()) {
+        try (var terminal = new Terminal()) {
 
-            terminal.print_centered("Hello and welcome!");
+            terminal.print_centered("Hello and welcome!", Color.RED, Style.UNDERLINE);
 
             var key = terminal.readKey();
 
             if (key == 'q') {
                 System.out.print("Goodbye!");
             } else {
-                var terminalSize = terminal.getTerminalSize();
 
-                terminal.print(
-                        "Terminal size: " + terminalSize.rows() + " rows, " + terminalSize.columns() + " cols");
                 terminal.print("You pressed: " + (char) key + " (" + key + ")");
                 terminal.print("Press 'q' to quit.\nNew Line");
 

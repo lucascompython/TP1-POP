@@ -1,4 +1,4 @@
-package org.tp1;
+package org.tp1.TerminalUtils;
 
 import static org.tp1.bindings.bindings_h.*;
 import org.tp1.bindings.*;
@@ -6,9 +6,9 @@ import org.tp1.bindings.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 
-public final class TerminalUtils implements AutoCloseable {
+public final class Terminal implements AutoCloseable {
 
-    public TerminalUtils() {
+    public Terminal() {
         enable_raw_mode();
         enter_alternate_screen();
         hideCursor();
@@ -36,17 +36,6 @@ public final class TerminalUtils implements AutoCloseable {
         return read_key();
     }
 
-    public TerminalSize getTerminalSize() {
-        try (var arena = Arena.ofConfined()) {
-            MemorySegment terminalSize = TermSize.reinterpret(get_terminal_size(), arena,
-                    bindings_h::free_terminal_size);
-
-            return new TerminalSize(
-                    TermSize.rows(terminalSize),
-                    TermSize.cols(terminalSize));
-        }
-    }
-
     public void print(String str) {
         try (var arena = Arena.ofConfined()) {
             var strSegment = arena.allocateFrom(str);
@@ -54,10 +43,10 @@ public final class TerminalUtils implements AutoCloseable {
         }
     }
 
-    public void print_centered(String str) {
+    public void print_centered(String str, Color color, Style style) {
         try (var arena = Arena.ofConfined()) {
             var strSegment = arena.allocateFrom(str);
-            write_centered_text(strSegment, strSegment.byteSize());
+            write_centered_text(strSegment, strSegment.byteSize(), (byte)color.ordinal(), (byte)style.ordinal());
         }
     }
 
