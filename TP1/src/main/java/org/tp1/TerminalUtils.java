@@ -54,6 +54,13 @@ public final class TerminalUtils implements AutoCloseable {
         }
     }
 
+    public void print_centered(String str) {
+        try (var arena = Arena.ofConfined()) {
+            var strSegment = arena.allocateFrom(str);
+            write_centered_text(strSegment, strSegment.byteSize());
+        }
+    }
+
     @Override
     public void close() {
         disable_raw_mode();

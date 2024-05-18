@@ -3,6 +3,20 @@ use crossterm::terminal::{
     disable_raw_mode as _disable_raw_mode, enable_raw_mode as _enable_raw_mode,
 };
 
+macro_rules! print_lines {
+    ($text:expr $(, $arg:expr)*) => {
+        for line in $text.lines() {
+            crossterm::execute!(
+                std::io::stdout(),
+                $($arg,)*
+                crossterm::style::Print(line),
+                crossterm::cursor::MoveToNextLine(1)
+            )
+            .expect("Unable to print text");
+        }
+    };
+}
+
 #[no_mangle]
 pub extern "C" fn enable_raw_mode() {
     _enable_raw_mode().expect("Unable to enable raw mode");
@@ -112,12 +126,18 @@ pub extern "C" fn write_text(text: *const u8, len: usize) {
     let text = unsafe { std::slice::from_raw_parts(text, len) };
     let text = std::str::from_utf8(text).expect("Invalid UTF-8 text");
 
-    for line in text.lines() {
-        crossterm::execute!(
-            std::io::stdout(),
-            crossterm::style::Print(line),
-            crossterm::cursor::MoveToNextLine(1)
-        )
-        .expect("Unable to print text");
-    }
+    print_lines!(text);
+}
+
+#[no_mangle]
+pub extern "C" fn write_centered_text(text: *const u8, len: usize) {
+    let text = unsafe { std::slice::from_raw_parts(text, len) };
+    let text = std::str::from_utf8(text).expect("Invalid UTF-8 text");
+
+    let (cols, rows) = crossterm::terminal::size().expect("Unable to get terminal size");
+
+    let y = rows / 2;
+    let x = (cols - text.len() as u16) / 2;
+
+    print_lines!(text, crossterm::cursor::MoveTo(x, y));
 }

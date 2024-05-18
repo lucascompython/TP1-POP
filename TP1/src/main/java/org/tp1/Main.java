@@ -2,20 +2,22 @@ package org.tp1;
 
 public final class Main {
     public static void main(String[] args) {
-        // System.out.println("Hello and welcome!");
 
         try (var terminal = new TerminalUtils()) {
+
+            terminal.print_centered("Hello and welcome!");
 
             var key = terminal.readKey();
 
             if (key == 'q') {
-                System.out.print("Goodbye!\n");
+                System.out.print("Goodbye!");
             } else {
                 var terminalSize = terminal.getTerminalSize();
 
                 terminal.print(
                         "Terminal size: " + terminalSize.rows() + " rows, " + terminalSize.columns() + " cols");
                 terminal.print("You pressed: " + (char) key + " (" + key + ")");
+                terminal.print("Press 'q' to quit.\nNew Line");
 
                 // sleep 5 seconds
 
