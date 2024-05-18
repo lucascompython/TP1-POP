@@ -1,7 +1,11 @@
-use crossterm::event::KeyCode;
+use std::io::stdout;
+use std::str::from_utf8;
+
+use crossterm::event::{self, KeyCode};
 use crossterm::terminal::{
     disable_raw_mode as _disable_raw_mode, enable_raw_mode as _enable_raw_mode,
 };
+use crossterm::{cursor, style, terminal};
 
 macro_rules! print_lines {
     ($text:expr $(, $arg:expr)*) => {
@@ -9,8 +13,8 @@ macro_rules! print_lines {
             crossterm::execute!(
                 std::io::stdout(),
                 $($arg,)*
-                crossterm::style::Print(line),
-                crossterm::cursor::MoveToNextLine(1)
+                style::Print(line),
+                cursor::MoveToNextLine(1)
             )
             .expect("Unable to print text");
         }
@@ -29,39 +33,35 @@ pub extern "C" fn disable_raw_mode() {
 
 #[no_mangle]
 pub extern "C" fn enter_alternate_screen() {
-    crossterm::execute!(std::io::stdout(), crossterm::terminal::EnterAlternateScreen)
+    crossterm::execute!(stdout(), terminal::EnterAlternateScreen)
         .expect("Unable to enter alternate screen");
 }
 
 #[no_mangle]
 pub extern "C" fn leave_alternate_screen() {
-    crossterm::execute!(std::io::stdout(), crossterm::terminal::LeaveAlternateScreen)
+    crossterm::execute!(stdout(), terminal::LeaveAlternateScreen)
         .expect("Unable to leave alternate screen");
 }
 
 #[no_mangle]
 pub extern "C" fn clear_screen() {
-    crossterm::execute!(
-        std::io::stdout(),
-        crossterm::terminal::Clear(crossterm::terminal::ClearType::All)
-    )
-    .expect("Unable to clear screen");
+    crossterm::execute!(stdout(), terminal::Clear(terminal::ClearType::All))
+        .expect("Unable to clear screen");
 }
 
 #[no_mangle]
 pub extern "C" fn move_cursor(x: u16, y: u16) {
-    crossterm::execute!(std::io::stdout(), crossterm::cursor::MoveTo(x, y))
-        .expect("Unable to move cursor");
+    crossterm::execute!(stdout(), cursor::MoveTo(x, y)).expect("Unable to move cursor");
 }
 
 #[no_mangle]
 pub extern "C" fn hide_cursor() {
-    crossterm::execute!(std::io::stdout(), crossterm::cursor::Hide).expect("Unable to hide cursor");
+    crossterm::execute!(stdout(), cursor::Hide).expect("Unable to hide cursor");
 }
 
 #[no_mangle]
 pub extern "C" fn show_cursor() {
-    crossterm::execute!(std::io::stdout(), crossterm::cursor::Show).expect("Unable to show cursor");
+    crossterm::execute!(stdout(), cursor::Show).expect("Unable to show cursor");
 }
 
 #[repr(C)]
@@ -72,7 +72,7 @@ pub struct TermSize {
 
 #[no_mangle]
 pub extern "C" fn get_terminal_size() -> *mut TermSize {
-    let (cols, rows) = crossterm::terminal::size().expect("Unable to get terminal size");
+    let (cols, rows) = terminal::size().expect("Unable to get terminal size");
     let term_size = TermSize { rows, cols };
 
     Box::into_raw(Box::new(term_size))
@@ -113,10 +113,10 @@ fn convert_key_u8(key: KeyCode) -> u8 {
 
 #[no_mangle]
 pub extern "C" fn read_key() -> u8 {
-    let event = crossterm::event::read().expect("Unable to read event");
+    let event = event::read().expect("Unable to read event");
 
     match event {
-        crossterm::event::Event::Key(key_event) => convert_key_u8(key_event.code),
+        event::Event::Key(key_event) => convert_key_u8(key_event.code),
         _ => read_key(), // Ignore other events and try again
     }
 }
@@ -124,7 +124,7 @@ pub extern "C" fn read_key() -> u8 {
 #[no_mangle]
 pub extern "C" fn write_text(text: *const u8, len: usize) {
     let text = unsafe { std::slice::from_raw_parts(text, len) };
-    let text = std::str::from_utf8(text).expect("Invalid UTF-8 text");
+    let text = from_utf8(text).expect("Invalid UTF-8 text");
 
     print_lines!(text);
 }
@@ -132,12 +132,12 @@ pub extern "C" fn write_text(text: *const u8, len: usize) {
 #[no_mangle]
 pub extern "C" fn write_centered_text(text: *const u8, len: usize) {
     let text = unsafe { std::slice::from_raw_parts(text, len) };
-    let text = std::str::from_utf8(text).expect("Invalid UTF-8 text");
+    let text = from_utf8(text).expect("Invalid UTF-8 text");
 
-    let (cols, rows) = crossterm::terminal::size().expect("Unable to get terminal size");
+    let (cols, rows) = terminal::size().expect("Unable to get terminal size");
 
     let y = rows / 2;
     let x = (cols - text.len() as u16) / 2;
 
-    print_lines!(text, crossterm::cursor::MoveTo(x, y));
+    print_lines!(text, cursor::MoveTo(x, y));
 }
