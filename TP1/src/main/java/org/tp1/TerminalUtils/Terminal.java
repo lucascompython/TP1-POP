@@ -64,6 +64,12 @@ public final class Terminal implements AutoCloseable {
         }
     }
 
+    public void printCenteredAndWait(String str, Color color, Style style) {
+        printCentered(str, color, style, -1);
+        printCentered("Press any key to continue", Color.NULL, Style.UNDERLINE, 1);
+        readKey();
+    }
+
     @Override
     public void close() {
         disable_raw_mode();

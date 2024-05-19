@@ -9,31 +9,33 @@ public final class Main {
 
         try (var terminal = new Terminal()) {
 
-            terminal.printCentered("Hello and welcome!", Color.GREEN, Style.BOLD, -1);
-            terminal.printCentered("Press any key to continue", Color.NULL, Style.UNDERLINE, 1);
+            terminal.printCenteredAndWait("Bem vindo ao sistema de gestão da oficina!", Color.GREEN, Style.BOLD);
 
-            var key = terminal.readKey();
+            var options = new String[] { "Gestão de Clientes", "Gestão de Mecânicos", "Gestão de Reparações",
+                    "Gestão de Veículos", "Gestão de Peças" };
 
-            if (key == 'q') {
-                System.out.print("Goodbye!");
-            } else {
+            var option = terminal.arrowMenu(options);
 
-                terminal.print("You pressed: " + (char) key + " (" + key + ")");
-                terminal.print("Press 'q' to quit.\nNew Line");
+            terminal.clear();
 
-                var option = terminal.arrowMenu(new String[] { "Option 1", "Option 2", "Option 3", "Option 4", "Option 5" });
-
-                System.out.println("You selected option " + (char) option + " (" + option + ")");
-
-
-                // sleep 5 seconds
-
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            switch (option) {
+                case 0:
+                    terminal.printCenteredAndWait("Gestão de Clientes", Color.GREEN, Style.BOLD);
+                    break;
+                case 1:
+                    terminal.printCenteredAndWait("Gestão de Mecânicos", Color.GREEN, Style.BOLD);
+                    break;
+                case 2:
+                    terminal.printCenteredAndWait("Gestão de Reparações", Color.GREEN, Style.BOLD);
+                    break;
+                case 3:
+                    terminal.printCenteredAndWait("Gestão de Veículos", Color.GREEN, Style.BOLD);
+                    break;
+                case 4:
+                    terminal.printCenteredAndWait("Gestão de Peças", Color.GREEN, Style.BOLD);
+                    break;
             }
+
 
             // try {
             // var w1 = new Worker("joao", Role.MANAGER, 1000, new
