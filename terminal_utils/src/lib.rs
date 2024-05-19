@@ -1,3 +1,4 @@
+use std::ffi::{c_char, CStr, CString};
 use std::io::stdout;
 use std::str::from_utf8;
 
@@ -153,12 +154,16 @@ fn convert_u8_to_style(style: u8) -> style::Attribute {
     }
 }
 
-#[no_mangle]
-pub extern "C" fn write_centered_text(text: *const u8, len: usize, color: u8, style: u8) {
-    let text = unsafe { std::slice::from_raw_parts(text, len) };
-    let text = from_utf8(text).expect("Invalid UTF-8 text");
+fn add(u: u16, i: i32) -> u16 {
+    if i < 0 {
+        u - i.abs() as u16
+    } else {
+        u + i as u16
+    }
+}
 
-    let y = unsafe { TERM_SIZE.rows / 2 };
+fn _write_centered_text(text: &str, color: u8, style: u8, row_offset: i32) {
+    let y = add(unsafe { TERM_SIZE.rows / 2 }, row_offset);
     let x = (unsafe { TERM_SIZE.cols } - text.len() as u16) / 2;
 
     if color != 0 {
@@ -183,5 +188,74 @@ pub extern "C" fn write_centered_text(text: *const u8, len: usize, color: u8, st
     if style != 0 {
         crossterm::execute!(stdout(), style::SetAttribute(style::Attribute::Reset))
             .expect("Unable to reset style");
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn write_centered_text(
+    text: *const u8,
+    len: usize,
+    color: u8,
+    style: u8,
+    row_offset: i32,
+) {
+    let text = unsafe { std::slice::from_raw_parts(text, len) };
+    let text = from_utf8(text).expect("Invalid UTF-8 text");
+
+    _write_centered_text(text, color, style, row_offset);
+}
+
+#[no_mangle]
+pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
+    let items = unsafe { CStr::from_ptr(items) };
+    let items = items.to_str().expect("Invalid UTF-8 text");
+    let items: Vec<&str> = items.lines().collect();
+
+    let items_length = items.len();
+    let mut selected = 0;
+
+    loop {
+        clear_screen();
+
+        for (i, item) in items.iter().enumerate() {
+            if i == selected {
+                crossterm::execute!(
+                    stdout(),
+                    style::SetForegroundColor(style::Color::Black),
+                    style::SetBackgroundColor(style::Color::White),
+                )
+                .expect("Unable to set color and style");
+            }
+
+            let offset = i as i32 - (items_length as i32 / 2);
+
+            _write_centered_text(item, 0, 0, offset as i32);
+
+            if i == selected {
+                crossterm::execute!(stdout(), style::ResetColor,)
+                    .expect("Unable to reset color and style");
+            }
+        }
+
+        match read_key() {
+            65 => {
+                // up
+                if selected > 0 {
+                    selected -= 1;
+                } else {
+                    selected = items_length - 1;
+                }
+            }
+            66 => {
+                // down
+                if selected < items_length - 1 {
+                    selected += 1;
+                } else {
+                    selected = 0;
+                }
+            }
+            13 => return selected as u8, // enter
+            _ => {}
+        }
     }
 }

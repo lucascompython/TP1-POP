@@ -23,6 +23,12 @@ uint8_t read_key(void);
 
 void write_text(const uint8_t *text, uintptr_t len);
 
-void write_centered_text(const uint8_t *text, uintptr_t len, uint8_t color, uint8_t style);
+void write_centered_text(const uint8_t *text,
+                         uintptr_t len,
+                         uint8_t color,
+                         uint8_t style,
+                         int32_t row_offset);
+
+uint8_t arrow_menu(const char *items);
 
 #endif /* BINDINGS_H */

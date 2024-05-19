@@ -9,7 +9,8 @@ public final class Main {
 
         try (var terminal = new Terminal()) {
 
-            terminal.print_centered("Hello and welcome!", Color.RED, Style.UNDERLINE);
+            terminal.printCentered("Hello and welcome!", Color.GREEN, Style.BOLD, -1);
+            terminal.printCentered("Press any key to continue", Color.NULL, Style.UNDERLINE, 1);
 
             var key = terminal.readKey();
 
@@ -19,6 +20,11 @@ public final class Main {
 
                 terminal.print("You pressed: " + (char) key + " (" + key + ")");
                 terminal.print("Press 'q' to quit.\nNew Line");
+
+                var option = terminal.arrowMenu(new String[] { "Option 1", "Option 2", "Option 3", "Option 4", "Option 5" });
+
+                System.out.println("You selected option " + (char) option + " (" + option + ")");
+
 
                 // sleep 5 seconds
 

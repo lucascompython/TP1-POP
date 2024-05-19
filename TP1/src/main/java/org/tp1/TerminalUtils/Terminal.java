@@ -43,10 +43,24 @@ public final class Terminal implements AutoCloseable {
         }
     }
 
-    public void print_centered(String str, Color color, Style style) {
+    public void printCentered(String str, Color color, Style style, int row_offset) {
         try (var arena = Arena.ofConfined()) {
             var strSegment = arena.allocateFrom(str);
-            write_centered_text(strSegment, strSegment.byteSize(), (byte)color.ordinal(), (byte)style.ordinal());
+            write_centered_text(strSegment, strSegment.byteSize(), (byte) color.ordinal(), (byte) style.ordinal(),
+                    (short) row_offset);
+        }
+    }
+
+    public byte arrowMenu(String[] options) {
+        StringBuilder sb = new StringBuilder();
+        for (String option : options) {
+            sb.append(option);
+            sb.append("\n");
+        }
+
+        try (var arena = Arena.ofConfined()) {
+            var strSegment = arena.allocateFrom(sb.toString());
+            return arrow_menu(strSegment);
         }
     }
 

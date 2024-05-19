@@ -1,7 +1,7 @@
 package org.tp1.TerminalUtils;
 
 public enum Color {
-    RESET,
+    NULL,
     BLACK,
     DARKGREY,
     RED,
