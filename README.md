@@ -80,5 +80,5 @@ LD_LIBRARY_LOAD="." ./TP1
 
 Aqui vou mencionar algumas coisas que podem ser interessantes.
 
-- No novo API FFM, as Strings são automaticamente convertidas para strings do tipo C (NULL terminated).  
+- No novo API FFM, as Strings em Java são automaticamente convertidas para strings do tipo C (NULL terminated).  
 - O tipo `char` em Rust é de 4 bytes (32 bits), o que é diferente do C/Java que é de 1 byte (8 bits). Por isso usei o tipo `u8` em Rust para representar um `char`.
