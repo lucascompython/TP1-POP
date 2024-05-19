@@ -12,7 +12,7 @@ public class MainMenu {
         try (var terminal = new Terminal()) {
             terminal.printCenteredAndWait("Bem vindo ao sistema de gestão da oficina!", Color.GREEN, Style.BOLD);
 
-            var options = new String[] { "Registar", "Modificar", "Listar", "Estatisticas" };
+            var options = new String[] { "Registar", "Modificar", "Listar", "Estatisticas", "Sair" };
 
             var option = terminal.arrowMenu(options);
 
@@ -58,7 +58,8 @@ public class MainMenu {
                 case 1 -> terminal.printCenteredAndWait("Gestão de Mecânicos", Color.GREEN, Style.BOLD);
                 case 2 -> terminal.printCenteredAndWait("Gestão de Reparações", Color.GREEN, Style.BOLD);
                 case 3 -> terminal.printCenteredAndWait("Gestão de Veículos", Color.GREEN, Style.BOLD);
-                case 4 -> terminal.printCenteredAndWait("Gestão de Peças", Color.GREEN, Style.BOLD);
+                case 4 -> {} // exit
+
             }
         }
     }
