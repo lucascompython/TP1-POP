@@ -6,6 +6,7 @@ fn main() {
         .with_language(cbindgen::Language::C)
         .with_no_includes()
         .with_sys_include("stdint.h")
+        .with_sys_include("stdbool.h")
         .with_include_guard("BINDINGS_H")
         .generate()
         .expect("Unable to generate bindings")

@@ -69,6 +69,40 @@ public final class Terminal implements AutoCloseable {
         readKey();
     }
 
+    public boolean inputMenu(InputItem[] inputs) {
+        try (var arena = Arena.ofConfined()) {
+            var inputsSegment = Input.allocateArray(inputs.length, arena);
+
+            for (int i = 0; i < inputs.length; i++) {
+                MemorySegment input = Input.asSlice(inputsSegment, i);
+
+                var labelSegment = arena.allocateFrom(inputs[i].label);
+                Input.label(input, labelSegment);
+
+                var valueSegment = arena.allocateFrom(inputs[i].value);
+                Input.value(input, valueSegment);
+
+                var isCheckbox = inputs[i].isCheckbox;
+                Input.is_checkbox(input, isCheckbox);
+
+                if (isCheckbox) {
+                    var checkboxOptions = inputs[i].checkboxOptions;
+                    var sb = new StringBuilder();
+
+                    for (String option : checkboxOptions) {
+                        sb.append(option);
+                        sb.append("\n");
+                    }
+
+                    var checkboxOptionsSegment = arena.allocateFrom(sb.toString());
+                    Input.checkbox_options(input, checkboxOptionsSegment);
+                }
+
+            }
+            return input_menu(inputsSegment, (byte)inputs.length);
+        }
+    }
+
     @Override
     public void close() {
         disable_raw_mode();

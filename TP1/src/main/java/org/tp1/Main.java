@@ -1,40 +1,13 @@
 package org.tp1;
 
-import org.tp1.TerminalUtils.Color;
-import org.tp1.TerminalUtils.Style;
-import org.tp1.TerminalUtils.Terminal;
+import org.tp1.Menu.MainMenu;
 
 public final class Main {
     public static void main(String[] args) {
 
-        try (var terminal = new Terminal()) {
 
-            terminal.printCenteredAndWait("Bem vindo ao sistema de gestão da oficina!", Color.GREEN, Style.BOLD);
+        new MainMenu();
 
-            var options = new String[] { "Gestão de Clientes", "Gestão de Mecânicos", "Gestão de Reparações",
-                    "Gestão de Veículos", "Gestão de Peças" };
-
-            var option = terminal.arrowMenu(options);
-
-            terminal.clear();
-
-            switch (option) {
-                case 0:
-                    terminal.printCenteredAndWait("Gestão de Clientes", Color.GREEN, Style.BOLD);
-                    break;
-                case 1:
-                    terminal.printCenteredAndWait("Gestão de Mecânicos", Color.GREEN, Style.BOLD);
-                    break;
-                case 2:
-                    terminal.printCenteredAndWait("Gestão de Reparações", Color.GREEN, Style.BOLD);
-                    break;
-                case 3:
-                    terminal.printCenteredAndWait("Gestão de Veículos", Color.GREEN, Style.BOLD);
-                    break;
-                case 4:
-                    terminal.printCenteredAndWait("Gestão de Peças", Color.GREEN, Style.BOLD);
-                    break;
-            }
 
             // try {
             // var w1 = new Worker("joao", Role.MANAGER, 1000, new
@@ -53,7 +26,6 @@ public final class Main {
             // catch (IllegalArgumentException e) {
             // System.err.println(e.getMessage());
             // }
-        }
 
     }
 }
