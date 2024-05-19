@@ -229,7 +229,7 @@ pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
 
             let offset = i as i32 - (items_length as i32 / 2);
 
-            _write_centered_text(item, 0, 0, offset as i32);
+            _write_centered_text(item, 0, 0, offset);
 
             if i == selected {
                 crossterm::execute!(stdout(), style::ResetColor,)
