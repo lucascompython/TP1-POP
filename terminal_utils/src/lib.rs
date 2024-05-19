@@ -1,6 +1,5 @@
-use std::ffi::{c_char, CStr, CString};
+use std::ffi::{c_char, CStr};
 use std::io::stdout;
-use std::str::from_utf8;
 
 use crossterm::event::{self, KeyCode};
 use crossterm::terminal::{
