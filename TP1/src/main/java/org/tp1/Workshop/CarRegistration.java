@@ -1,4 +1,4 @@
-package org.tp1;
+package org.tp1.Workshop;
 
 public record CarRegistration(String registration) {
 

@@ -1,4 +1,4 @@
-package org.tp1;
+package org.tp1.Workshop;
 
 public final class Worker {
     public static int count = 0;

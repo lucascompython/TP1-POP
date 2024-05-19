@@ -1,4 +1,4 @@
-package org.tp1;
+package org.tp1.Workshop;
 
 import java.time.LocalDateTime;
 

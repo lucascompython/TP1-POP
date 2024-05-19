@@ -225,7 +225,7 @@ pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
             _write_centered_text(item, 0, 0, offset);
 
             if i == selected {
-                crossterm::execute!(stdout(), style::ResetColor,)
+                crossterm::execute!(stdout(), style::ResetColor)
                     .expect("Unable to reset color and style");
             }
         }
