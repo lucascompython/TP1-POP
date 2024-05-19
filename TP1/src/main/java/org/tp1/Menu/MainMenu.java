@@ -39,7 +39,16 @@ public class MainMenu {
 
                             var result = terminal.inputMenu(inputItems);
 
+                            terminal.clear();
                             terminal.printCentered("Resultado: " + result, Color.GREEN, Style.BOLD, 0);
+                            // sleep 2 seconds
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+
                         }
                         case 1 -> terminal.printCenteredAndWait("Registar Cliente", Color.GREEN, Style.BOLD);
                         case 2 -> terminal.printCenteredAndWait("Registar Arranjo", Color.GREEN, Style.BOLD);

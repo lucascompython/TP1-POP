@@ -602,7 +602,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                 }
             }
 
-            13 => return true,
+            13 => return selected_button,
 
             _ => {}
         }
