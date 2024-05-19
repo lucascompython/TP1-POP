@@ -46,8 +46,7 @@ public final class Terminal implements AutoCloseable {
     public void printCentered(String str, Color color, Style style, int row_offset) {
         try (var arena = Arena.ofConfined()) {
             var strSegment = arena.allocateFrom(str);
-            write_centered_text(strSegment, (byte) color.ordinal(), (byte) style.ordinal(),
-                    (short) row_offset);
+            write_centered_text(strSegment, (byte) color.ordinal(), (byte) style.ordinal(), (short) row_offset);
         }
     }
 

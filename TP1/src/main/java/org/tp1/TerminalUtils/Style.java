@@ -7,4 +7,3 @@ public enum Style {
     ITALIC,
     UNDERLINE
 }
-

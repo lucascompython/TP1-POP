@@ -36,7 +36,6 @@ public final class Main {
                     break;
             }
 
-
             // try {
             // var w1 = new Worker("joao", Role.MANAGER, 1000, new
             // Contact("ola@mecanicos.pt", 928155170));
