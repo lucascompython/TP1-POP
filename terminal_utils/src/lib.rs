@@ -113,11 +113,11 @@ pub extern "C" fn read_key() -> u8 {
 }
 
 #[no_mangle]
-pub extern "C" fn write_text(text: *const u8, len: usize) {
-    let text = unsafe { std::slice::from_raw_parts(text, len) };
-    let text = from_utf8(text).expect("Invalid UTF-8 text");
+pub extern "C" fn write_text(text: *const c_char) {
+    let text = unsafe { CStr::from_ptr(text) };
+    let text = text.to_str().expect("Invalid UTF-8 text");
 
-    print_lines!(text, cursor::MoveToNextLine(1));
+    print_lines!(text);
 }
 
 fn convert_u8_to_color(color: u8) -> style::Color {
@@ -192,15 +192,9 @@ fn _write_centered_text(text: &str, color: u8, style: u8, row_offset: i32) {
 }
 
 #[no_mangle]
-pub extern "C" fn write_centered_text(
-    text: *const u8,
-    len: usize,
-    color: u8,
-    style: u8,
-    row_offset: i32,
-) {
-    let text = unsafe { std::slice::from_raw_parts(text, len) };
-    let text = from_utf8(text).expect("Invalid UTF-8 text");
+pub extern "C" fn write_centered_text(text: *const c_char, color: u8, style: u8, row_offset: i32) {
+    let text = unsafe { CStr::from_ptr(text) };
+    let text = text.to_str().expect("Invalid UTF-8 text");
 
     _write_centered_text(text, color, style, row_offset);
 }

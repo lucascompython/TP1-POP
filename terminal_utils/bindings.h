@@ -21,13 +21,9 @@ void show_cursor(void);
 
 uint8_t read_key(void);
 
-void write_text(const uint8_t *text, uintptr_t len);
+void write_text(const char *text);
 
-void write_centered_text(const uint8_t *text,
-                         uintptr_t len,
-                         uint8_t color,
-                         uint8_t style,
-                         int32_t row_offset);
+void write_centered_text(const char *text, uint8_t color, uint8_t style, int32_t row_offset);
 
 uint8_t arrow_menu(const char *items);
 
