@@ -107,7 +107,13 @@ pub extern "C" fn read_key() -> u8 {
     let event = event::read().expect("Unable to read event");
 
     match event {
-        event::Event::Key(key_event) => convert_key_to_u8(key_event.code),
+        event::Event::Key(key_event) => {
+            if key_event.kind == event::KeyEventKind::Press {
+                convert_key_to_u8(key_event.code)
+            } else {
+                read_key()
+            }
+        }
         _ => read_key(), // Ignore other events and try again
     }
 }
