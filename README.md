@@ -11,7 +11,7 @@ Para gerar esse header usei uma build-time dependency, [cbindgen](https://github
 
 Ver diagrama a baixo.
 
-![Diagrama do funcionamento tp1](/diagrama%20tp1.drawio.png)
+![Diagrama do funcionamento tp1](/diagrama%20tp1.png)
 
 ## Instruções para compilar
 
