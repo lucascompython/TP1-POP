@@ -11,7 +11,10 @@ Para gerar esse header usei uma build-time dependency, [cbindgen](https://github
 
 Ver diagrama a baixo.
 
-![Diagrama do funcionamento tp1](/diagrama%20tp1.png)
+![Diagrama do funcionamento tp1](/diagrama%20tp1.png)  
+
+Decidi usar a libraria [crossterm](https://github.com/crossterm-rs/crossterm) em Rust para facilitar a portabilidade do programa.  
+Usei tambem o [Gradle](https://gradle.org/) como build system para o Java.
 
 ## Instruções para compilar
 
