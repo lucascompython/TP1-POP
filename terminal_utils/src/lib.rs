@@ -331,28 +331,28 @@ fn print_checkbox_option(option: &str, selected: bool, is_checkbox_selected: boo
 
 #[no_mangle]
 pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
-    let inputs = inputs as *mut Input;
     let inputs: &mut [Input] =
-        unsafe { std::slice::from_raw_parts_mut(inputs, inputs_length as usize) };
+        unsafe { std::slice::from_raw_parts_mut(inputs as *mut Input, inputs_length as usize) };
 
     let mut selected = 0;
     let mut selected_checkbox: i32 = -1;
     let mut selected_button = true; // true = OK false = Cancelar
 
-    let mut checkbox_length = 0;
-    let mut checkbox_options: Vec<&str> = Vec::new();
-
-    if let Some(last_input) = inputs.last() {
+    let checkbox_options = if let Some(last_input) = inputs.last() {
         if last_input.is_checkbox {
-            checkbox_options = unsafe { CStr::from_ptr(last_input.checkbox_options) }
+            unsafe { CStr::from_ptr(last_input.checkbox_options) }
                 .to_str()
                 .expect("Invalid UTF-8 text")
                 .lines()
-                .collect();
-
-            checkbox_length = checkbox_options.len();
+                .collect()
+        } else {
+            Vec::new()
         }
-    }
+    } else {
+        Vec::new()
+    };
+
+    let checkbox_length = checkbox_options.len();
 
     loop {
         clear_screen();
@@ -381,27 +381,23 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
             }
         }
 
-        if selected_button {
-            _write_centered_text(
-                &format!(
-                    "                              {}   [CANCELAR]",
-                    "[OK]".black().on_white()
-                ),
-                0,
-                0,
-                inputs_length as i32 / 2 + checkbox_length as i32 + 1,
+        let button_text = if selected_button {
+            format!(
+                "                              {}   [CANCELAR]",
+                "[OK]".black().on_white()
             )
         } else {
-            _write_centered_text(
-                &format!(
-                    "                              [OK]   {}",
-                    "[CANCELAR]".black().on_white()
-                ),
-                0,
-                0,
-                inputs_length as i32 / 2 + checkbox_length as i32 + 1,
+            format!(
+                "                              [OK]   {}",
+                "[CANCELAR]".black().on_white()
             )
-        }
+        };
+        _write_centered_text(
+            &button_text,
+            0,
+            0,
+            inputs_length as i32 / 2 + checkbox_length as i32 + 1,
+        );
 
         let char = read_key();
         match char {
@@ -423,22 +419,9 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                 }
             }
 
-            68 => {
-                // left
-                if selected_button {
-                    selected_button = false;
-                } else {
-                    selected_button = true;
-                }
-            }
-
-            67 => {
-                // right
-                if !selected_button {
-                    selected_button = true;
-                } else {
-                    selected_button = false;
-                }
+            68 | 67 => {
+                // left or right
+                selected_button = !selected_button;
             }
 
             32 => {
@@ -460,7 +443,6 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                     // normal input
 
                     let input = &mut inputs[selected];
-
                     unsafe {
                         let value = input.value as *mut u8;
 
