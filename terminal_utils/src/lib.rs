@@ -269,7 +269,7 @@ pub struct Input {
 
 fn print_menu_item(label: &str, value: &str, is_checkbox: bool, selected: bool, offset: i32) {
     let y = add(unsafe { TERM_SIZE.rows / 2 }, offset);
-    let x = (unsafe { TERM_SIZE.cols } - label.len() as u16 - 1) / 2;
+    let x = (unsafe { TERM_SIZE.cols } - label.len() as u16 - value.len() as u16 - 1) / 2;
 
     // I am using write! here because this way I don't need to allocate a new String
     if selected {
@@ -362,6 +362,12 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
 
     let checkbox_length = checkbox_options.len();
 
+    let buttons_offset = if checkbox_length > 0 {
+        (inputs_length + checkbox_length as u8) / 2 + 1
+    } else {
+        ((inputs_length + 1) / 2) + 2 // + 2 to leave a space between the inputs and the buttons
+    };
+
     loop {
         clear_screen();
         for (i, input) in inputs.iter().enumerate() {
@@ -400,12 +406,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                 "[CANCELAR]".black().on_white()
             )
         };
-        _write_centered_text(
-            &button_text,
-            0,
-            0,
-            inputs_length as i32 / 2 + checkbox_length as i32 + 1,
-        );
+        _write_centered_text(&button_text, 0, 0, buttons_offset as i32);
 
         let char = read_key();
         match char {

@@ -48,7 +48,32 @@ public class Menu {
                             mainMenu();
                         }
                     }
-                    case 1 -> terminal.printCenteredAndWait("Registar Cliente", Color.GREEN, Style.BOLD);
+                    case 1 -> {
+                        var inputItems = new InputItem[]{
+                                new InputItem("Nome", ""),
+                                new InputItem("NIF", ""),
+                                new InputItem("Email", ""),
+                                new InputItem("Telefone", "")
+                        };
+
+                        var result = terminal.inputMenu(inputItems);
+
+                        if (result) {
+                            terminal.printCenteredAndWait("Cliente registado com sucesso!", Color.GREEN, Style.BOLD);
+
+                            // print all the values
+                            for (InputItem inputItem : inputItems) {
+                                terminal.printCenteredAndWait(inputItem.label + ": " + inputItem.value, Color.NULL,
+                                        Style.NULL);
+                            }
+
+                            mainMenu();
+                        } else {
+                            mainMenu();
+                        }
+
+
+                    }
                     case 2 -> terminal.printCenteredAndWait("Registar Arranjo", Color.GREEN, Style.BOLD);
                 }
 
