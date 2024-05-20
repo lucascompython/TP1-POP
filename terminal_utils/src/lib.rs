@@ -274,7 +274,7 @@ fn print_menu_item(label: &str, value: &str, is_checkbox: bool, selected: bool, 
     // I am using write! here because this way I don't need to allocate a new String
     if selected {
         if is_checkbox {
-            crossterm::execute!(stdout(), cursor::MoveTo(x - 2, y),).unwrap();
+            crossterm::execute!(stdout(), cursor::MoveTo(x - 2, y)).unwrap();
             write!(
                 stdout(),
                 "> {}{}{} <\n",
@@ -284,7 +284,7 @@ fn print_menu_item(label: &str, value: &str, is_checkbox: bool, selected: bool, 
             )
             .unwrap();
         } else {
-            crossterm::execute!(stdout(), cursor::MoveTo(x - 2, y)).unwrap();
+            crossterm::execute!(stdout(), cursor::MoveTo(x - 4, y)).unwrap();
             write!(stdout(), "> {}: {} <\n", label, value).unwrap();
         }
     } else {
@@ -300,7 +300,7 @@ fn print_menu_item(label: &str, value: &str, is_checkbox: bool, selected: bool, 
 
             crossterm::execute!(stdout(), style::SetAttribute(style::Attribute::Reset)).unwrap();
         } else {
-            crossterm::execute!(stdout(), cursor::MoveTo(x, y)).unwrap();
+            crossterm::execute!(stdout(), cursor::MoveTo(x - 2, y)).unwrap();
             write!(stdout(), "{}: {}\n", label, value).unwrap();
         }
     }
@@ -471,7 +471,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
             13 => return selected_button,
 
             _ => {
-                if selected < inputs_length as usize {
+                if selected < inputs_length as usize && !inputs[selected].is_checkbox {
                     let input = &mut inputs[selected];
 
                     unsafe {

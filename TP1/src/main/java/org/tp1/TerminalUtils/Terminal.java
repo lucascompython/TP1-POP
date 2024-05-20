@@ -86,7 +86,7 @@ public final class Terminal implements AutoCloseable {
 
                 MemorySegment valueSegment;
                 if (isCheckbox) {
-                    valueSegment = arena.allocate(1);
+                    valueSegment = arena.allocate(1); // 1 byte for the checkbox value, it's a number
 
                     var checkboxOptions = inputs[i].checkboxOptions;
                     var sb = new StringBuilder();

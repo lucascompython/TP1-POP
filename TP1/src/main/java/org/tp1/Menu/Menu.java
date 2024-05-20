@@ -24,10 +24,10 @@ public class Menu {
                     case 0 -> {
                         var inputItems = new InputItem[] {
                                 new InputItem("Nome", "Lucas de Linhares"),
-                                new InputItem("NIF", "123456"),
-                                new InputItem("Email", "test@email.com"),
-                                new InputItem("Telefone", "987654321"),
-                                new InputItem("Tipo de Trabalhador", "2",
+                                new InputItem("NIF", ""),
+                                new InputItem("Email", ""),
+                                new InputItem("Telefone", ""),
+                                new InputItem("Tipo de Trabalhador", "1",
                                         new String[] { "Mecânico", "Gerente", "Rececionista" })
                         };
 
