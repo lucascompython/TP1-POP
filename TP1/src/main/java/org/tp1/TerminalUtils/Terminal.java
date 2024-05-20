@@ -64,6 +64,7 @@ public final class Terminal implements AutoCloseable {
     }
 
     public void printCenteredAndWait(String str, Color color, Style style) {
+        clear();
         printCentered(str, color, style, -1);
         printCentered("Pressione qualquer tecla para continuar", Color.NULL, Style.UNDERLINE, 1);
         readKey();

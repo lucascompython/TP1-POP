@@ -1,12 +1,12 @@
 package org.tp1;
 
-import org.tp1.Menu.MainMenu;
+import org.tp1.Menu.Menu;
 
 public final class Main {
     public static void main(String[] args) {
 
 
-        new MainMenu();
+        new Menu();
 
 
             // try {
