@@ -1,6 +1,6 @@
 package org.tp1.TerminalUtils;
 
-public class InputItem {
+public final class InputItem {
     public final String label;
     public String value;
     public final boolean isCheckbox;
