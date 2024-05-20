@@ -28,13 +28,15 @@ public class Menu {
                                 new InputItem("NIF", ""),
                                 new InputItem("Email", ""),
                                 new InputItem("Telefone", ""),
-                                new InputItem("Tipo de Trabalhador", "", new String[] { "Mecânico", "Gestor" })
+                                new InputItem("Tipo de Trabalhador", "", new String[] { "Mecânico", "Gerente", "Rececionista" })
                         };
 
                         var result = terminal.inputMenu(inputItems);
 
                         if (result) {
                             terminal.printCenteredAndWait("Trabalhador registado com sucesso!", Color.GREEN, Style.BOLD);
+                            terminal.printCenteredAndWait("Tipo de Trabalhador: " + inputItems[4].checkboxOptions[Integer.parseInt(inputItems[4].value)], Color.NULL, Style.NULL);
+
                             mainMenu();
                         }
                         else {

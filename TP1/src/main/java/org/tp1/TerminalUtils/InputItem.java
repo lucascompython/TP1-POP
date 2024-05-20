@@ -2,7 +2,7 @@ package org.tp1.TerminalUtils;
 
 public class InputItem {
     public final String label;
-    public final String value;
+    public String value;
     public final boolean isCheckbox;
     public final String[] checkboxOptions;
 

@@ -1,4 +1,4 @@
-use std::ffi::{c_char, CStr};
+use std::ffi::{c_char, CStr, CString};
 use std::io::{stdout, Write};
 
 use crossterm::event::{self, KeyCode};
@@ -493,7 +493,9 @@ fn print_checkbox_option(option: &str, selected: bool, is_checkbox_selected: boo
 
 #[no_mangle]
 pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
-    let inputs = unsafe { std::slice::from_raw_parts(inputs, inputs_length as usize) };
+    let inputs = inputs as *mut Input;
+    let inputs: &mut [Input] =
+        unsafe { std::slice::from_raw_parts_mut(inputs, inputs_length as usize) };
 
     let mut selected = 0;
     let mut selected_checkbox: i32 = -1;
@@ -501,6 +503,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
 
     let mut checkbox_length = 0;
     let mut checkbox_options: Vec<&str> = Vec::new();
+
     if let Some(last_input) = inputs.last() {
         if last_input.is_checkbox {
             checkbox_options = unsafe { CStr::from_ptr(last_input.checkbox_options) }
@@ -522,18 +525,17 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                 .to_str()
                 .expect("Invalid UTF-8 text");
 
-            let value = unsafe { CStr::from_ptr(input.value) }
-                .to_str()
-                .expect("Invalid UTF-8 text");
+            let value = unsafe { CStr::from_ptr(input.value) }.to_str().unwrap();
 
             print_menu_item(label, value, input.is_checkbox, i == selected, offset);
 
             if input.is_checkbox {
                 for (j, option) in checkbox_options.iter().enumerate() {
-                    let offset = (i as i32 + 1) - (checkbox_length as i32 / 2) + j as i32 - 2;
+                    let offset = (i as i32 + 1) - (checkbox_length as i32 / 2) + j as i32
+                        - checkbox_length as i32;
                     print_checkbox_option(
                         option,
-                        j + checkbox_length + 3 == selected,
+                        j + checkbox_length + 2 == selected,
                         j as i32 == selected_checkbox,
                         offset,
                     );
@@ -605,6 +607,11 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                 // space
                 if selected > inputs_length as usize - 1 {
                     selected_checkbox = selected as i32 - inputs_length as i32;
+
+                    let input = &mut inputs[inputs_length as usize - 1]; // assuming the last input is the checkbox
+
+                    let cstring = CString::new(selected_checkbox.to_string()).unwrap();
+                    input.value = cstring.into_raw();
                 }
             }
 

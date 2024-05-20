@@ -5,6 +5,7 @@ import org.tp1.bindings.*;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
 
 public final class Terminal implements AutoCloseable {
 
@@ -100,7 +101,16 @@ public final class Terminal implements AutoCloseable {
                 }
 
             }
-            return input_menu(inputsSegment, (byte)inputs.length);
+            var result = input_menu(inputsSegment, (byte)inputs.length);
+
+            // get the values back
+            for (int i = 0; i < inputs.length; i++) {
+                MemorySegment input = Input.asSlice(inputsSegment, i);
+                var value = Input.value(input);
+                inputs[i].value = value.getString(0);
+            }
+
+            return result;
         }
     }
 
