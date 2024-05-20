@@ -1,4 +1,4 @@
-use std::ffi::{c_char, CStr, CString};
+use std::ffi::{c_char, CStr};
 use std::io::{stdout, Write};
 
 use crossterm::event::{self, KeyCode};
@@ -267,168 +267,6 @@ pub struct Input {
     pub checkbox_options: *const c_char, // Multiple options separated by newlines
 }
 
-// #[no_mangle]
-// pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
-//     let inputs = unsafe { std::slice::from_raw_parts(inputs, inputs_length as usize) };
-
-//     let mut selected = 0;
-//     let mut selected_checkbox_option = 0;
-
-//     loop {
-//         clear_screen();
-
-//         for (i, input) in inputs.iter().enumerate() {
-//             let offset = i as i32 - (inputs_length as i32 / 2);
-
-//             if i == selected {
-//                 crossterm::execute!(
-//                     stdout(),
-//                     style::SetForegroundColor(style::Color::Black),
-//                     style::SetBackgroundColor(style::Color::White),
-//                 )
-//                 .expect("Unable to set color and style");
-//             }
-
-//             let label = unsafe { CStr::from_ptr(input.label) };
-//             let label = label.to_str().expect("Invalid UTF-8 text");
-
-//             let value = unsafe { CStr::from_ptr(input.value) };
-//             let value = value.to_str().expect("Invalid UTF-8 text");
-
-//             if input.is_checkbox {
-//                 let options = unsafe { CStr::from_ptr(input.checkbox_options) };
-//                 let options = options.to_str().expect("Invalid UTF-8 text");
-//                 let options: Vec<&str> = options.lines().collect();
-
-//                 _write_centered_text(label, 0, 0, offset);
-
-//                 for (j, option) in options.iter().enumerate() {
-//                     let offset = j as i32 - (options.len() as i32 / 2);
-
-//                     if j == selected_checkbox_option {
-//                         crossterm::execute!(
-//                             stdout(),
-//                             style::SetForegroundColor(style::Color::Black),
-//                             style::SetBackgroundColor(style::Color::White),
-//                         )
-//                         .expect("Unable to set color and style");
-//                     }
-
-//                     let checkbox = if j == selected_checkbox_option {
-//                         "X"
-//                     } else {
-//                         " "
-//                     };
-
-//                     print_lines!(
-//                         format!("{}: [{}] {}", option, checkbox, value),
-//                         cursor::MoveTo(0, add(unsafe { TERM_SIZE.rows / 2 }, offset))
-//                     );
-
-//                     if j == selected_checkbox_option {
-//                         crossterm::execute!(stdout(), style::ResetColor)
-//                             .expect("Unable to reset color and style");
-//                     }
-//                 }
-//             } else {
-//                 _write_centered_text(format!("{}: {}", label, value).as_str(), 0, 0, offset);
-//             }
-
-//             if i == selected {
-//                 crossterm::execute!(stdout(), style::ResetColor)
-//                     .expect("Unable to reset color and style");
-//             }
-//         }
-
-//         let offset = inputs_length as i32 / 2 + 1;
-
-//         if selected == inputs_length as usize {
-//             crossterm::execute!(
-//                 stdout(),
-//                 style::SetForegroundColor(style::Color::Black),
-//                 style::SetBackgroundColor(style::Color::White),
-//             )
-//             .expect("Unable to set color and style");
-//         }
-
-//         _write_centered_text("OK", 0, 0, offset);
-
-//         if selected == inputs_length as usize {
-//             crossterm::execute!(stdout(), style::ResetColor)
-//                 .expect("Unable to reset color and style");
-//         }
-
-//         if selected == inputs_length as usize + 1 {
-//             crossterm::execute!(
-//                 stdout(),
-//                 style::SetForegroundColor(style::Color::Black),
-//                 style::SetBackgroundColor(style::Color::White),
-//             )
-//             .expect("Unable to set color and style");
-//         }
-
-//         _write_centered_text("Cancel", 0, 0, offset + 1);
-
-//         if selected == inputs_length as usize + 1 {
-//             crossterm::execute!(stdout(), style::ResetColor)
-//                 .expect("Unable to reset color and style");
-//         }
-
-//         match read_key() {
-//             65 => {
-//                 // up
-//                 if selected > 0 {
-//                     selected -= 1;
-//                 } else {
-//                     selected = inputs_length as usize + 1;
-//                 }
-//             }
-//             66 => {
-//                 // down
-//                 if selected < inputs_length as usize + 1 {
-//                     selected += 1;
-//                 } else {
-//                     selected = 0;
-//                 }
-//             }
-//             13 => {
-//                 if selected == inputs_length as usize {
-//                     return true;
-//                 } else if selected == inputs_length as usize + 1 {
-//                     return false;
-//                 } else if inputs[selected].is_checkbox {
-//                     let options = unsafe { CStr::from_ptr(inputs[selected].checkbox_options) };
-//                     let options = options.to_str().expect("Invalid UTF-8 text");
-//                     let options: Vec<&str> = options.lines().collect();
-
-//                     if selected_checkbox_option < options.len() - 1 {
-//                         selected_checkbox_option += 1;
-//                     } else {
-//                         selected_checkbox_option = 0;
-//                     }
-//                 }
-//             }
-//             68 => {
-//                 // left
-//                 if selected == inputs_length as usize {
-//                     selected = inputs_length as usize + 1;
-//                 } else if selected == inputs_length as usize + 1 {
-//                     selected = inputs_length as usize;
-//                 }
-//             }
-//             67 => {
-//                 // right
-//                 if selected == inputs_length as usize {
-//                     selected = inputs_length as usize + 1;
-//                 } else if selected == inputs_length as usize + 1 {
-//                     selected = inputs_length as usize;
-//                 }
-//             }
-//             _ => {}
-//         }
-//     }
-// }
-
 fn print_menu_item(label: &str, value: &str, is_checkbox: bool, selected: bool, offset: i32) {
     let y = add(unsafe { TERM_SIZE.rows / 2 }, offset);
     let x = (unsafe { TERM_SIZE.cols } - label.len() as u16 - 1) / 2;
@@ -606,22 +444,67 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
             32 => {
                 // space
                 if selected > inputs_length as usize - 1 {
+                    // checkbox
+
                     selected_checkbox = selected as i32 - inputs_length as i32;
 
                     let input = &mut inputs[inputs_length as usize - 1]; // assuming the last input is the checkbox
 
-                    let cstring = CString::new(selected_checkbox.to_string()).unwrap();
-                    input.value = cstring.into_raw();
+                    unsafe {
+                        // avoid allocating a new String by writing to the already allocated memory that Java allocated
+                        let value = input.value as *mut u8;
+                        *value = selected_checkbox as u8 + b'0';
+                        *value.add(1) = 0;
+                    }
+                } else {
+                    // normal input
+
+                    let input = &mut inputs[selected];
+
+                    unsafe {
+                        let value = input.value as *mut u8;
+
+                        let mut len = 0;
+                        while *value.add(len) != 0 {
+                            len += 1;
+                        }
+
+                        if len + 2 <= 40 {
+                            *value.add(len) = b' ';
+                            *value.add(len + 1) = 0;
+                        }
+                    }
                 }
             }
 
             13 => return selected_button,
 
-            _ => {}
+            _ => {
+                if selected < inputs_length as usize {
+                    let input = &mut inputs[selected];
+
+                    unsafe {
+                        let value = input.value as *mut u8;
+
+                        let mut len = 0;
+                        while *value.add(len) != 0 {
+                            len += 1;
+                        }
+
+                        if char == 8 {
+                            if len > 0 {
+                                len -= 1;
+                                *value.add(len) = 0;
+                            }
+                        } else {
+                            if len + 2 <= 40 {
+                                *value.add(len) = char;
+                                *value.add(len + 1) = 0;
+                            }
+                        }
+                    }
+                }
+            }
         }
-
-        //     if input.is_checkbox {
-
-        // }
     }
 }

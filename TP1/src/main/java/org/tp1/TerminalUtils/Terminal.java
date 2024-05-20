@@ -81,13 +81,13 @@ public final class Terminal implements AutoCloseable {
                 var labelSegment = arena.allocateFrom(inputs[i].label);
                 Input.label(input, labelSegment);
 
-                var valueSegment = arena.allocateFrom(inputs[i].value);
-                Input.value(input, valueSegment);
-
                 var isCheckbox = inputs[i].isCheckbox;
                 Input.is_checkbox(input, isCheckbox);
 
+                MemorySegment valueSegment;
                 if (isCheckbox) {
+                    valueSegment = arena.allocate(1);
+
                     var checkboxOptions = inputs[i].checkboxOptions;
                     var sb = new StringBuilder();
 
@@ -98,10 +98,13 @@ public final class Terminal implements AutoCloseable {
 
                     var checkboxOptionsSegment = arena.allocateFrom(sb.toString());
                     Input.checkbox_options(input, checkboxOptionsSegment);
+                } else {
+                    valueSegment = arena.allocate(40);
                 }
+                Input.value(input, valueSegment);
 
             }
-            var result = input_menu(inputsSegment, (byte)inputs.length);
+            var result = input_menu(inputsSegment, (byte) inputs.length);
 
             // get the values back
             for (int i = 0; i < inputs.length; i++) {

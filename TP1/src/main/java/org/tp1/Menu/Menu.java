@@ -14,7 +14,6 @@ public class Menu {
 
         var option = terminal.arrowMenu(options);
 
-
         switch (option) {
             case 0 -> {
                 var registerOptions = new String[] { "Registar Trabalhador", "Registar Cliente", "Registar Arranjo" };
@@ -28,19 +27,25 @@ public class Menu {
                                 new InputItem("NIF", ""),
                                 new InputItem("Email", ""),
                                 new InputItem("Telefone", ""),
-                                new InputItem("Tipo de Trabalhador", "", new String[] { "Mecânico", "Gerente", "Rececionista" })
+                                new InputItem("Tipo de Trabalhador", "",
+                                        new String[] { "Mecânico", "Gerente", "Rececionista" })
                         };
 
                         var result = terminal.inputMenu(inputItems);
 
                         if (result) {
-                            terminal.printCenteredAndWait("Trabalhador registado com sucesso!", Color.GREEN, Style.BOLD);
-                            terminal.printCenteredAndWait("Tipo de Trabalhador: " + inputItems[4].checkboxOptions[Integer.parseInt(inputItems[4].value)], Color.NULL, Style.NULL);
+                            terminal.printCenteredAndWait("Trabalhador registado com sucesso!", Color.GREEN,
+                                    Style.BOLD);
+
+                            // print all the values
+                            for (InputItem inputItem : inputItems) {
+                                terminal.printCenteredAndWait(inputItem.label + ": " + inputItem.value, Color.NULL,
+                                        Style.NULL);
+                            }
 
                             mainMenu();
-                        }
-                        else {
-                           mainMenu();
+                        } else {
+                            mainMenu();
                         }
                     }
                     case 1 -> terminal.printCenteredAndWait("Registar Cliente", Color.GREEN, Style.BOLD);
@@ -51,12 +56,12 @@ public class Menu {
             case 1 -> terminal.printCenteredAndWait("Gestão de Mecânicos", Color.GREEN, Style.BOLD);
             case 2 -> terminal.printCenteredAndWait("Gestão de Reparações", Color.GREEN, Style.BOLD);
             case 3 -> terminal.printCenteredAndWait("Gestão de Veículos", Color.GREEN, Style.BOLD);
-            case 4 -> {} // exit
+            case 4 -> {
+            } // exit
 
         }
 
     }
-
 
     public Menu() {
 
