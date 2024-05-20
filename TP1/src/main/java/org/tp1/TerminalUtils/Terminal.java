@@ -101,6 +101,11 @@ public final class Terminal implements AutoCloseable {
                 } else {
                     valueSegment = arena.allocate(40);
                 }
+
+                var value = inputs[i].value;
+                byte[] valueBytes = value.getBytes();
+                int length = valueBytes.length;
+                MemorySegment.copy(valueBytes, 0, valueSegment, ValueLayout.JAVA_BYTE, 0, length);
                 Input.value(input, valueSegment);
 
             }

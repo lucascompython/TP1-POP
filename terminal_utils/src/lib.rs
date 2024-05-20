@@ -340,6 +340,14 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
 
     let checkbox_options = if let Some(last_input) = inputs.last() {
         if last_input.is_checkbox {
+            let checkbox_value = unsafe { CStr::from_ptr(last_input.value) }
+                .to_str()
+                .expect("Invalid UTF-8 text");
+
+            if !checkbox_value.is_empty() {
+                selected_checkbox = checkbox_value.parse().expect("Invalid checkbox value");
+            }
+
             unsafe { CStr::from_ptr(last_input.checkbox_options) }
                 .to_str()
                 .expect("Invalid UTF-8 text")
