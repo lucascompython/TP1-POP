@@ -345,7 +345,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                 .expect("Invalid UTF-8 text");
 
             if !checkbox_value.is_empty() {
-                selected_checkbox = checkbox_value.parse().expect("Invalid checkbox value");
+                selected_checkbox = checkbox_value.parse().unwrap();
             }
 
             unsafe { CStr::from_ptr(last_input.checkbox_options) }
@@ -468,7 +468,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                 }
             }
 
-            13 => return selected_button,
+            13 => return selected_button, // enter
 
             _ => {
                 if selected < inputs_length as usize && !inputs[selected].is_checkbox {
