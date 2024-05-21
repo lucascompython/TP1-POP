@@ -10,11 +10,17 @@ use crossterm::{cursor, style, terminal};
 
 static mut TERM_SIZE: TermSize = TermSize { rows: 0, cols: 0 };
 
+static mut STDOUT: Option<std::io::Stdout> = None;
+
+fn get_stdout() -> &'static mut std::io::Stdout {
+    unsafe { STDOUT.as_mut().unwrap() }
+}
+
 macro_rules! print_lines {
     ($text:expr $(, $arg:expr)*) => {
         for line in $text.lines() {
             crossterm::execute!(
-                std::io::stdout(),
+                get_stdout(),
                 $($arg,)*
                 style::Print(line),
                 cursor::MoveToNextLine(1)
@@ -45,37 +51,38 @@ pub extern "C" fn enter_alternate_screen() {
     unsafe {
         TERM_SIZE.rows = rows;
         TERM_SIZE.cols = cols;
+        STDOUT = Some(stdout());
     }
 
-    crossterm::execute!(stdout(), terminal::EnterAlternateScreen)
+    crossterm::execute!(get_stdout(), terminal::EnterAlternateScreen)
         .expect("Unable to enter alternate screen");
 }
 
 #[no_mangle]
 pub extern "C" fn leave_alternate_screen() {
-    crossterm::execute!(stdout(), terminal::LeaveAlternateScreen)
+    crossterm::execute!(get_stdout(), terminal::LeaveAlternateScreen)
         .expect("Unable to leave alternate screen");
 }
 
 #[no_mangle]
 pub extern "C" fn clear_screen() {
-    crossterm::execute!(stdout(), terminal::Clear(terminal::ClearType::All))
+    crossterm::execute!(get_stdout(), terminal::Clear(terminal::ClearType::All))
         .expect("Unable to clear screen");
 }
 
 #[no_mangle]
 pub extern "C" fn move_cursor(x: u16, y: u16) {
-    crossterm::execute!(stdout(), cursor::MoveTo(x, y)).expect("Unable to move cursor");
+    crossterm::execute!(get_stdout(), cursor::MoveTo(x, y)).expect("Unable to move cursor");
 }
 
 #[no_mangle]
 pub extern "C" fn hide_cursor() {
-    crossterm::execute!(stdout(), cursor::Hide).expect("Unable to hide cursor");
+    crossterm::execute!(get_stdout(), cursor::Hide).expect("Unable to hide cursor");
 }
 
 #[no_mangle]
 pub extern "C" fn show_cursor() {
-    crossterm::execute!(stdout(), cursor::Show).expect("Unable to show cursor");
+    crossterm::execute!(get_stdout(), cursor::Show).expect("Unable to show cursor");
 }
 
 fn convert_key_to_u8(key: KeyCode) -> u8 {
@@ -174,25 +181,28 @@ fn _write_centered_text(text: &str, color: u8, style: u8, row_offset: i32) {
 
     if color != 0 {
         crossterm::execute!(
-            stdout(),
+            get_stdout(),
             style::SetForegroundColor(convert_u8_to_color(color))
         )
         .expect("Unable to set color");
     }
 
     if style != 0 {
-        crossterm::execute!(stdout(), style::SetAttribute(convert_u8_to_style(style)))
-            .expect("Unable to set style");
+        crossterm::execute!(
+            get_stdout(),
+            style::SetAttribute(convert_u8_to_style(style))
+        )
+        .expect("Unable to set style");
     }
 
     print_lines!(text, cursor::MoveTo(x, y));
 
     if color != 0 {
-        crossterm::execute!(stdout(), style::ResetColor).expect("Unable to reset color");
+        crossterm::execute!(get_stdout(), style::ResetColor).expect("Unable to reset color");
     }
 
     if style != 0 {
-        crossterm::execute!(stdout(), style::SetAttribute(style::Attribute::Reset))
+        crossterm::execute!(get_stdout(), style::SetAttribute(style::Attribute::Reset))
             .expect("Unable to reset style");
     }
 }
@@ -219,7 +229,7 @@ pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
         for (i, item) in items.iter().enumerate() {
             if i == selected {
                 crossterm::execute!(
-                    stdout(),
+                    get_stdout(),
                     style::SetForegroundColor(style::Color::Black),
                     style::SetBackgroundColor(style::Color::White),
                 )
@@ -231,7 +241,7 @@ pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
             _write_centered_text(item, 0, 0, offset);
 
             if i == selected {
-                crossterm::execute!(stdout(), style::ResetColor)
+                crossterm::execute!(get_stdout(), style::ResetColor)
                     .expect("Unable to reset color and style");
             }
         }
@@ -274,9 +284,9 @@ fn print_menu_item(label: &str, value: &str, is_checkbox: bool, selected: bool, 
     // I am using write! here because this way I don't need to allocate a new String
     if selected {
         if is_checkbox {
-            crossterm::execute!(stdout(), cursor::MoveTo(x - 2, y)).unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
             write!(
-                stdout(),
+                get_stdout(),
                 "> {}{}{} <\n",
                 style::Attribute::Underlined,
                 label,
@@ -284,24 +294,25 @@ fn print_menu_item(label: &str, value: &str, is_checkbox: bool, selected: bool, 
             )
             .unwrap();
         } else {
-            crossterm::execute!(stdout(), cursor::MoveTo(x - 4, y)).unwrap();
-            write!(stdout(), "> {}: {} <\n", label, value).unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 4, y)).unwrap();
+            write!(get_stdout(), "> {}: {} <\n", label, value).unwrap();
         }
     } else {
         if is_checkbox {
             crossterm::execute!(
-                stdout(),
+                get_stdout(),
                 cursor::MoveTo(x, y),
                 style::SetAttribute(style::Attribute::Underlined)
             )
             .unwrap();
 
-            write!(stdout(), "{}\n", label).unwrap();
+            write!(get_stdout(), "{}\n", label).unwrap();
 
-            crossterm::execute!(stdout(), style::SetAttribute(style::Attribute::Reset)).unwrap();
+            crossterm::execute!(get_stdout(), style::SetAttribute(style::Attribute::Reset))
+                .unwrap();
         } else {
-            crossterm::execute!(stdout(), cursor::MoveTo(x - 2, y)).unwrap();
-            write!(stdout(), "{}: {}\n", label, value).unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
+            write!(get_stdout(), "{}: {}\n", label, value).unwrap();
         }
     }
 }
@@ -312,19 +323,19 @@ fn print_checkbox_option(option: &str, selected: bool, is_checkbox_selected: boo
 
     if selected {
         if is_checkbox_selected {
-            crossterm::execute!(stdout(), cursor::MoveTo(x - 2, y),).unwrap();
-            write!(stdout(), "> {}: [X] <\n", option).unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y),).unwrap();
+            write!(get_stdout(), "> {}: [X] <\n", option).unwrap();
         } else {
-            crossterm::execute!(stdout(), cursor::MoveTo(x - 2, y)).unwrap();
-            write!(stdout(), "> {}: [ ] <\n", option).unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
+            write!(get_stdout(), "> {}: [ ] <\n", option).unwrap();
         }
     } else {
         if is_checkbox_selected {
-            crossterm::execute!(stdout(), cursor::MoveTo(x, y)).unwrap();
-            write!(stdout(), "{}: [X]\n", option).unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x, y)).unwrap();
+            write!(get_stdout(), "{}: [X]\n", option).unwrap();
         } else {
-            crossterm::execute!(stdout(), cursor::MoveTo(x, y)).unwrap();
-            write!(stdout(), "{}: [ ]\n", option).unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x, y)).unwrap();
+            write!(get_stdout(), "{}: [ ]\n", option).unwrap();
         }
     }
 }
