@@ -5,8 +5,6 @@ public final class NIF {
     private final String nif;
 
     public NIF(String nif) {
-        if (!validate(nif))
-            throw new IllegalArgumentException("Invalid NIF");
         this.nif = nif;
     }
 

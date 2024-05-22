@@ -1,3 +1,5 @@
+// TODO: Optimize by using queue
+
 use std::ffi::{c_char, CStr};
 use std::io::{stdout, Write};
 
@@ -23,7 +25,6 @@ macro_rules! print_lines {
                 get_stdout(),
                 $($arg,)*
                 style::Print(line),
-                cursor::MoveToNextLine(1)
             )
             .expect("Unable to print text");
         }
@@ -279,32 +280,32 @@ pub struct Input {
 
 fn print_menu_item(label: &str, value: &str, is_checkbox: bool, selected: bool, offset: i32) {
     let y = add(unsafe { TERM_SIZE.rows / 2 }, offset);
-    let x = (unsafe { TERM_SIZE.cols } - label.len() as u16 - value.len() as u16 - 1) / 2;
+    let x = (unsafe { TERM_SIZE.cols } - label.len() as u16 - value.len() as u16) / 2;
 
     // I am using write! here because this way I don't need to allocate a new String
     if selected {
         if is_checkbox {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y),).unwrap();
             write!(
                 get_stdout(),
-                "> {}{}{} <\n",
+                "> {}{}{} <",
                 style::Attribute::Underlined,
                 label,
                 style::Attribute::NoUnderline
             )
             .unwrap();
         } else {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 4, y)).unwrap();
-            write!(get_stdout(), "> {}: {} <\n", label, value).unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 4, y),).unwrap();
+            write!(get_stdout(), "> {}: {} <", label, value).unwrap();
         }
     } else {
         if is_checkbox {
             crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y),).unwrap();
 
-            write!(get_stdout(), "  {}  \n", label.underlined()).unwrap();
+            write!(get_stdout(), "  {}  ", label.underlined()).unwrap();
         } else {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 4, y)).unwrap();
-            write!(get_stdout(), "  {}: {}  \n", label, value).unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 4, y),).unwrap();
+            write!(get_stdout(), "  {}: {}  ", label, value).unwrap();
         }
     }
 }
@@ -316,18 +317,18 @@ fn print_checkbox_option(option: &str, selected: bool, is_checkbox_selected: boo
     if selected {
         if is_checkbox_selected {
             crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y),).unwrap();
-            write!(get_stdout(), "> {}: [X] <\n", option).unwrap();
+            write!(get_stdout(), "> {}: [X] <", option).unwrap();
         } else {
             crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
-            write!(get_stdout(), "> {}: [ ] <\n", option).unwrap();
+            write!(get_stdout(), "> {}: [ ] <", option).unwrap();
         }
     } else {
         if is_checkbox_selected {
             crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
-            write!(get_stdout(), "  {}: [X]  \n", option).unwrap();
+            write!(get_stdout(), "  {}: [X]  ", option).unwrap();
         } else {
             crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
-            write!(get_stdout(), "  {}: [ ]  \n", option).unwrap();
+            write!(get_stdout(), "  {}: [ ]  ", option).unwrap();
         }
     }
 }
@@ -340,6 +341,9 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
     let mut selected = 0;
     let mut selected_checkbox: i32 = -1;
     let mut selected_button = true; // true = OK false = Cancelar
+
+    let mut button_text = String::with_capacity(76);
+    let y = add(unsafe { TERM_SIZE.rows / 2 }, 0);
 
     let checkbox_options = if let Some(last_input) = inputs.last() {
         if last_input.is_checkbox {
@@ -387,11 +391,15 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
 
             if input.is_checkbox {
                 for (j, option) in checkbox_options.iter().enumerate() {
-                    let offset = (i as i32 + 1) - (checkbox_length as i32 / 2) + j as i32
-                        - checkbox_length as i32;
+                    let offset = if inputs_length >= 2 {
+                        (i as i32 + 1) - (checkbox_length as i32 / 2) + j as i32
+                            - checkbox_length as i32
+                    } else {
+                        (i as i32) - (checkbox_length as i32 / 2) + j as i32
+                    };
                     print_checkbox_option(
                         option,
-                        j + checkbox_length + 2 == selected,
+                        selected as i32 - inputs_length as i32 == j as i32,
                         j as i32 == selected_checkbox,
                         offset,
                     );
@@ -399,16 +407,16 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
             }
         }
 
-        let button_text = if selected_button {
-            format!(
-                "                              {}   [CANCELAR]",
-                "[OK]".black().on_white()
-            )
+        // Do this to avoid allocating a new String each iteration
+        if selected_button {
+            button_text.clear();
+            button_text.push_str("                              ");
+            button_text.push_str(&"[OK]".black().on_white().to_string());
+            button_text.push_str("   [CANCELAR]");
         } else {
-            format!(
-                "                              [OK]   {}",
-                "[CANCELAR]".black().on_white()
-            )
+            button_text.clear();
+            button_text.push_str("                              [OK]   ");
+            button_text.push_str(&"[CANCELAR]".black().on_white().to_string());
         };
         _write_centered_text(&button_text, 0, 0, buttons_offset as i32);
 
@@ -439,6 +447,11 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
 
             32 => {
                 // space
+
+                if selected < inputs_length as usize && inputs[selected].is_checkbox {
+                    continue;
+                }
+
                 if selected > inputs_length as usize - 1 {
                     // checkbox
 
@@ -487,9 +500,23 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                         }
 
                         if char == 8 {
+                            // backspace
                             if len > 0 {
                                 len -= 1;
                                 *value.add(len) = 0;
+
+                                // Clear the line when backspacing to avoid the '>' '<' artifacts
+                                crossterm::execute!(
+                                    get_stdout(),
+                                    cursor::MoveTo(
+                                        0,
+                                        y - (inputs_length as u16 / 2) + selected as u16
+                                            - checkbox_length as u16
+                                            + 1
+                                    ),
+                                    terminal::Clear(terminal::ClearType::CurrentLine)
+                                )
+                                .unwrap();
                             }
                         } else {
                             if len + 2 <= 40 {
