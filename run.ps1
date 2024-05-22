@@ -8,6 +8,7 @@ cd terminal_utils
 cargo build $(if ($release) { "--release" })
 
 if ($LASTEXITCODE -ne 0) {
+    cd ..
     exit $LASTEXITCODE
 }
 
@@ -15,6 +16,7 @@ cd ../TP1
 ./gradlew.bat installDist
 
 if ($LASTEXITCODE -ne 0) {
+    cd ..
     exit $LASTEXITCODE
 }
 

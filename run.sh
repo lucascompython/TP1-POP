@@ -12,6 +12,7 @@ cd terminal_utils
 cargo build $CARGO_FLAG
 
 if [ $? -ne 0 ]; then
+    cd ..
     exit $?
 fi
 
@@ -19,6 +20,7 @@ cd ../TP1
 ./gradlew installDist
 
 if [ $? -ne 0 ]; then
+    cd ..
     exit $?
 fi
 
