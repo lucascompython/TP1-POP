@@ -299,20 +299,12 @@ fn print_menu_item(label: &str, value: &str, is_checkbox: bool, selected: bool, 
         }
     } else {
         if is_checkbox {
-            crossterm::execute!(
-                get_stdout(),
-                cursor::MoveTo(x, y),
-                style::SetAttribute(style::Attribute::Underlined)
-            )
-            .unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y),).unwrap();
 
-            write!(get_stdout(), "{}\n", label).unwrap();
-
-            crossterm::execute!(get_stdout(), style::SetAttribute(style::Attribute::Reset))
-                .unwrap();
+            write!(get_stdout(), "  {}  \n", label.underlined()).unwrap();
         } else {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
-            write!(get_stdout(), "{}: {}\n", label, value).unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 4, y)).unwrap();
+            write!(get_stdout(), "  {}: {}  \n", label, value).unwrap();
         }
     }
 }
@@ -331,11 +323,11 @@ fn print_checkbox_option(option: &str, selected: bool, is_checkbox_selected: boo
         }
     } else {
         if is_checkbox_selected {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x, y)).unwrap();
-            write!(get_stdout(), "{}: [X]\n", option).unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
+            write!(get_stdout(), "  {}: [X]  \n", option).unwrap();
         } else {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x, y)).unwrap();
-            write!(get_stdout(), "{}: [ ]\n", option).unwrap();
+            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
+            write!(get_stdout(), "  {}: [ ]  \n", option).unwrap();
         }
     }
 }
@@ -379,8 +371,9 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
         ((inputs_length + 1) / 2) + 2 // + 2 to leave a space between the inputs and the buttons
     };
 
+    clear_screen();
+
     loop {
-        clear_screen();
         for (i, input) in inputs.iter().enumerate() {
             let offset = i as i32 - (inputs_length as i32 / 2) - checkbox_length as i32 + 1;
 
