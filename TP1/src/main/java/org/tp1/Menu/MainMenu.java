@@ -33,6 +33,8 @@ public final class MainMenu {
             case 2 -> terminal.printCenteredAndWait("Gestão de Reparações", Color.GREEN, Style.BOLD);
             case 3 -> terminal.printCenteredAndWait("Gestão de Veículos", Color.GREEN, Style.BOLD);
             case 4 -> {
+                terminal.close();
+                System.exit(0);
             } // exit
 
         }

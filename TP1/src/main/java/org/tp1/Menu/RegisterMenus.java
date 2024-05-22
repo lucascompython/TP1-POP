@@ -48,7 +48,7 @@ public final class RegisterMenus {
         var result = terminal.inputMenu(inputItems);
 
         if (result) {
-
+            ValidationMenus.validateEmpty(inputItems, terminal, mainMenuInstance);
             ValidationMenus.validateNIF(inputItems, terminal, mainMenuInstance);
             ValidationMenus.validateEmailAndPhone(inputItems, terminal, mainMenuInstance);
 
