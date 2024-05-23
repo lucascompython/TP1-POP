@@ -513,7 +513,7 @@ pub extern "C" fn search_menu(items: *const c_char) -> u8 {
         crossterm::queue!(stdout, terminal::Clear(terminal::ClearType::All)).unwrap();
         let x = (unsafe { TERM_SIZE.cols } - 9 - search.len() as u16) / 2; // 9 is the length of "Pesquisa:"
 
-        // I am not using write_centered_text here because this way I can avoid allocating a new String
+        // I am not using write_centered_text here because this way I can avoid allocating a new String by not using format!
         crossterm::queue!(
             stdout,
             cursor::MoveTo(x, y),
