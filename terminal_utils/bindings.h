@@ -11,25 +11,11 @@ typedef struct Input {
   const char *checkbox_options;
 } Input;
 
-void enable_raw_mode(void);
+void init(void);
 
-void disable_raw_mode(void);
+void deinit(void);
 
-void enter_alternate_screen(void);
-
-void leave_alternate_screen(void);
-
-void clear_screen(void);
-
-void move_cursor(uint16_t x, uint16_t y);
-
-void hide_cursor(void);
-
-void show_cursor(void);
-
-uint8_t read_key(void);
-
-void write_text(const char *text);
+void print_centered_and_wait(const char *text, uint8_t color, uint8_t style);
 
 void write_centered_text(const char *text, uint8_t color, uint8_t style, int32_t row_offset);
 

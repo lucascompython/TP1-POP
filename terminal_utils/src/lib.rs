@@ -1,5 +1,3 @@
-// TODO: Optimize by using queue
-
 use std::ffi::{c_char, CStr};
 use std::io::{stdout, Write};
 
@@ -21,7 +19,7 @@ fn get_stdout() -> &'static mut std::io::Stdout {
 macro_rules! print_lines {
     ($text:expr $(, $arg:expr)*) => {
         for line in $text.lines() {
-            crossterm::execute!(
+            crossterm::queue!(
                 get_stdout(),
                 $($arg,)*
                 style::Print(line),
@@ -36,88 +34,43 @@ struct TermSize {
 }
 
 #[no_mangle]
-pub extern "C" fn enable_raw_mode() {
-    _enable_raw_mode().expect("Unable to enable raw mode");
-}
-
-#[no_mangle]
-pub extern "C" fn disable_raw_mode() {
-    _disable_raw_mode().expect("Unable to disable raw mode");
-}
-
-#[no_mangle]
-pub extern "C" fn enter_alternate_screen() {
+pub extern "C" fn init() {
+    let stdout = stdout();
     let (cols, rows) = terminal::size().expect("Unable to get terminal size");
-
     unsafe {
         TERM_SIZE.rows = rows;
         TERM_SIZE.cols = cols;
-        STDOUT = Some(stdout());
-    }
+        STDOUT = Some(stdout);
+    };
 
-    crossterm::execute!(get_stdout(), terminal::EnterAlternateScreen)
-        .expect("Unable to enter alternate screen");
+    _enable_raw_mode().unwrap();
+
+    let stdout = get_stdout();
+
+    crossterm::queue!(stdout, terminal::EnterAlternateScreen, cursor::Hide)
+        .expect("Unable to initialize terminal");
+
+    stdout.flush().unwrap();
 }
 
 #[no_mangle]
-pub extern "C" fn leave_alternate_screen() {
-    crossterm::execute!(get_stdout(), terminal::LeaveAlternateScreen)
-        .expect("Unable to leave alternate screen");
+pub extern "C" fn deinit() {
+    let stdout = get_stdout();
+    crossterm::queue!(stdout, terminal::LeaveAlternateScreen, cursor::Show)
+        .expect("Unable to deinitialize terminal");
+
+    _disable_raw_mode().unwrap();
+
+    stdout.flush().unwrap();
 }
 
-#[no_mangle]
-pub extern "C" fn clear_screen() {
-    crossterm::execute!(get_stdout(), terminal::Clear(terminal::ClearType::All))
-        .expect("Unable to clear screen");
-}
-
-#[no_mangle]
-pub extern "C" fn move_cursor(x: u16, y: u16) {
-    crossterm::execute!(get_stdout(), cursor::MoveTo(x, y)).expect("Unable to move cursor");
-}
-
-#[no_mangle]
-pub extern "C" fn hide_cursor() {
-    crossterm::execute!(get_stdout(), cursor::Hide).expect("Unable to hide cursor");
-}
-
-#[no_mangle]
-pub extern "C" fn show_cursor() {
-    crossterm::execute!(get_stdout(), cursor::Show).expect("Unable to show cursor");
-}
-
-fn convert_key_to_u8(key: KeyCode) -> u8 {
-    match key {
-        KeyCode::Backspace => 8,
-        KeyCode::Enter => 13,
-        KeyCode::Left => 68,
-        KeyCode::Right => 67,
-        KeyCode::Up => 65,
-        KeyCode::Down => 66,
-        KeyCode::Home => 72,
-        KeyCode::End => 70,
-        KeyCode::PageUp => 53,
-        KeyCode::PageDown => 54,
-        KeyCode::Tab => 9,
-        KeyCode::BackTab => 15,
-        KeyCode::Delete => 127,
-        KeyCode::Insert => 50,
-        KeyCode::F(n) => 59 + n,
-        KeyCode::Char(c) => c as u8,
-        KeyCode::Null => 0,
-        KeyCode::Esc => 27,
-        _ => 0,
-    }
-}
-
-#[no_mangle]
-pub extern "C" fn read_key() -> u8 {
+fn read_key() -> KeyCode {
     let event = event::read().expect("Unable to read event");
 
     match event {
         event::Event::Key(key_event) => {
             if key_event.kind == event::KeyEventKind::Press {
-                convert_key_to_u8(key_event.code)
+                key_event.code
             } else {
                 read_key()
             }
@@ -127,11 +80,19 @@ pub extern "C" fn read_key() -> u8 {
 }
 
 #[no_mangle]
-pub extern "C" fn write_text(text: *const c_char) {
+pub extern "C" fn print_centered_and_wait(text: *const c_char, color: u8, style: u8) {
     let text = unsafe { CStr::from_ptr(text) };
     let text = text.to_str().expect("Invalid UTF-8 text");
 
-    print_lines!(text);
+    let stdout = get_stdout();
+
+    crossterm::queue!(stdout, terminal::Clear(terminal::ClearType::All)).unwrap();
+
+    _write_centered_text(text, color, style, -1);
+    _write_centered_text("Pressione qualquer tecla para continuar", 0, 4, 1);
+    stdout.flush().unwrap();
+
+    read_key();
 }
 
 fn convert_u8_to_color(color: u8) -> style::Color {
@@ -181,7 +142,7 @@ fn _write_centered_text(text: &str, color: u8, style: u8, row_offset: i32) {
     let x = (unsafe { TERM_SIZE.cols } - text.len() as u16) / 2;
 
     if color != 0 {
-        crossterm::execute!(
+        crossterm::queue!(
             get_stdout(),
             style::SetForegroundColor(convert_u8_to_color(color))
         )
@@ -189,7 +150,7 @@ fn _write_centered_text(text: &str, color: u8, style: u8, row_offset: i32) {
     }
 
     if style != 0 {
-        crossterm::execute!(
+        crossterm::queue!(
             get_stdout(),
             style::SetAttribute(convert_u8_to_style(style))
         )
@@ -199,11 +160,11 @@ fn _write_centered_text(text: &str, color: u8, style: u8, row_offset: i32) {
     print_lines!(text, cursor::MoveTo(x, y));
 
     if color != 0 {
-        crossterm::execute!(get_stdout(), style::ResetColor).expect("Unable to reset color");
+        crossterm::queue!(get_stdout(), style::ResetColor).expect("Unable to reset color");
     }
 
     if style != 0 {
-        crossterm::execute!(get_stdout(), style::SetAttribute(style::Attribute::Reset))
+        crossterm::queue!(get_stdout(), style::SetAttribute(style::Attribute::Reset))
             .expect("Unable to reset style");
     }
 }
@@ -214,6 +175,7 @@ pub extern "C" fn write_centered_text(text: *const c_char, color: u8, style: u8,
     let text = text.to_str().expect("Invalid UTF-8 text");
 
     _write_centered_text(text, color, style, row_offset);
+    get_stdout().flush().unwrap();
 }
 
 #[no_mangle]
@@ -225,12 +187,15 @@ pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
     let items_length = items.len();
     let mut selected = 0;
 
-    clear_screen();
+    let stdout = get_stdout();
+
+    crossterm::queue!(stdout, terminal::Clear(terminal::ClearType::All)).unwrap();
+
     loop {
         for (i, item) in items.iter().enumerate() {
             if i == selected {
-                crossterm::execute!(
-                    get_stdout(),
+                crossterm::queue!(
+                    stdout,
                     style::SetForegroundColor(style::Color::Black),
                     style::SetBackgroundColor(style::Color::White),
                 )
@@ -242,13 +207,15 @@ pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
             _write_centered_text(item, 0, 0, offset);
 
             if i == selected {
-                crossterm::execute!(get_stdout(), style::ResetColor)
+                crossterm::queue!(stdout, style::ResetColor)
                     .expect("Unable to reset color and style");
             }
         }
 
+        stdout.flush().unwrap();
+
         match read_key() {
-            65 => {
+            KeyCode::Up => {
                 // up
                 if selected > 0 {
                     selected -= 1;
@@ -256,7 +223,7 @@ pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
                     selected = items_length - 1;
                 }
             }
-            66 => {
+            KeyCode::Down => {
                 // down
                 if selected < items_length - 1 {
                     selected += 1;
@@ -264,7 +231,7 @@ pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
                     selected = 0;
                 }
             }
-            13 => return selected as u8, // enter
+            KeyCode::Enter => return selected as u8, // enter
             _ => {}
         }
     }
@@ -285,7 +252,7 @@ fn print_menu_item(label: &str, value: &str, is_checkbox: bool, selected: bool, 
     // I am using write! here because this way I don't need to allocate a new String
     if selected {
         if is_checkbox {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y),).unwrap();
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 2, y),).unwrap();
             write!(
                 get_stdout(),
                 "> {}{}{} <",
@@ -295,16 +262,16 @@ fn print_menu_item(label: &str, value: &str, is_checkbox: bool, selected: bool, 
             )
             .unwrap();
         } else {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 4, y),).unwrap();
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 4, y),).unwrap();
             write!(get_stdout(), "> {}: {} <", label, value).unwrap();
         }
     } else {
         if is_checkbox {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y),).unwrap();
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 2, y),).unwrap();
 
             write!(get_stdout(), "  {}  ", label.underlined()).unwrap();
         } else {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 4, y),).unwrap();
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 4, y),).unwrap();
             write!(get_stdout(), "  {}: {}  ", label, value).unwrap();
         }
     }
@@ -316,18 +283,18 @@ fn print_checkbox_option(option: &str, selected: bool, is_checkbox_selected: boo
 
     if selected {
         if is_checkbox_selected {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y),).unwrap();
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 2, y),).unwrap();
             write!(get_stdout(), "> {}: [X] <", option).unwrap();
         } else {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
             write!(get_stdout(), "> {}: [ ] <", option).unwrap();
         }
     } else {
         if is_checkbox_selected {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
             write!(get_stdout(), "  {}: [X]  ", option).unwrap();
         } else {
-            crossterm::execute!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
             write!(get_stdout(), "  {}: [ ]  ", option).unwrap();
         }
     }
@@ -337,6 +304,8 @@ fn print_checkbox_option(option: &str, selected: bool, is_checkbox_selected: boo
 pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
     let inputs: &mut [Input] =
         unsafe { std::slice::from_raw_parts_mut(inputs as *mut Input, inputs_length as usize) };
+
+    let stdout = get_stdout();
 
     let mut selected = 0;
     let mut selected_checkbox: i32 = -1;
@@ -375,7 +344,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
         ((inputs_length + 1) / 2) + 2 // + 2 to leave a space between the inputs and the buttons
     };
 
-    clear_screen();
+    crossterm::queue!(stdout, terminal::Clear(terminal::ClearType::All)).unwrap();
 
     loop {
         for (i, input) in inputs.iter().enumerate() {
@@ -420,10 +389,11 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
         };
         _write_centered_text(&button_text, 0, 0, buttons_offset as i32);
 
+        stdout.flush().unwrap();
+
         let char = read_key();
         match char {
-            65 => {
-                // up
+            KeyCode::Up => {
                 if selected > 0 {
                     selected -= 1;
                 } else {
@@ -431,8 +401,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                 }
             }
 
-            66 => {
-                // down
+            KeyCode::Down => {
                 if selected < inputs_length as usize + checkbox_length as usize - 1 {
                     selected += 1;
                 } else {
@@ -440,14 +409,11 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                 }
             }
 
-            68 | 67 => {
-                // left or right
+            KeyCode::Left | KeyCode::Right => {
                 selected_button = !selected_button;
             }
 
-            32 => {
-                // space
-
+            KeyCode::Char(' ') => {
                 if selected < inputs_length as usize && inputs[selected].is_checkbox {
                     continue;
                 }
@@ -485,7 +451,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                 }
             }
 
-            13 => return selected_button, // enter
+            KeyCode::Enter => return selected_button, // enter
 
             _ => {
                 if selected < inputs_length as usize && !inputs[selected].is_checkbox {
@@ -499,15 +465,14 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                             len += 1;
                         }
 
-                        if char == 8 {
-                            // backspace
+                        if char == KeyCode::Backspace {
                             if len > 0 {
                                 len -= 1;
                                 *value.add(len) = 0;
 
                                 // Clear the line when backspacing to avoid the '>' '<' artifacts
-                                crossterm::execute!(
-                                    get_stdout(),
+                                crossterm::queue!(
+                                    stdout,
                                     cursor::MoveTo(
                                         0,
                                         y - (inputs_length as u16 / 2) + selected as u16
@@ -520,7 +485,10 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                             }
                         } else {
                             if len + 2 <= 40 {
-                                *value.add(len) = char;
+                                *value.add(len) = match char {
+                                    KeyCode::Char(c) => c as u8,
+                                    _ => 0,
+                                };
                                 *value.add(len + 1) = 0;
                             }
                         }
