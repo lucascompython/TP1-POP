@@ -2,7 +2,7 @@
 
 ## TUI
 
-Para fazer uma interface decente, tive que usar uma linguagem de baixo nivel para conseguir acesso total ao terminal. Neste caso usei Rust. Desenvolvi uma  pequena biblioteca para dar o acesso necessario ao Java.
+Para fazer uma interface decente, tive que usar uma linguagem de baixo nivel para conseguir acesso total ao terminal. Neste caso usei [Rust](https://www.rust-lang.org/). Desenvolvi uma  pequena biblioteca para dar o acesso necessario ao Java.
 
 A biblioteca em Rust "comunica" com a JVM usando o API [FFM](https://openjdk.org/jeps/454) introduzido no JDK 22.
 
