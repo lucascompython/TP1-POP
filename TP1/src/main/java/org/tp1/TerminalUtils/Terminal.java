@@ -21,15 +21,13 @@ public final class Terminal implements AutoCloseable {
         }
 
         try (var arena = Arena.ofConfined()) {
-            var strSegment = arena.allocateFrom(sb.toString());
-            return arrow_menu(strSegment);
+            return arrow_menu(arena.allocateFrom(sb.toString()));
         }
     }
 
     public void printCenteredAndWait(String str, Color color, Style style) {
         try (var arena = Arena.ofConfined()) {
-                var strSegment = arena.allocateFrom(str);
-                print_centered_and_wait(strSegment, (byte) color.ordinal(), (byte) style.ordinal());
+            print_centered_and_wait(arena.allocateFrom(str), (byte) color.ordinal(), (byte) style.ordinal());
         }
     }
 
@@ -40,20 +38,17 @@ public final class Terminal implements AutoCloseable {
             for (int i = 0; i < inputs.length; i++) {
                 MemorySegment input = Input.asSlice(inputsSegment, i);
 
-                var labelSegment = arena.allocateFrom(inputs[i].label);
-                Input.label(input, labelSegment);
+                Input.label(input, arena.allocateFrom(inputs[i].label));
 
-                var isCheckbox = inputs[i].isCheckbox;
-                Input.is_checkbox(input, isCheckbox);
+                Input.is_checkbox(input, inputs[i].isCheckbox);
 
                 MemorySegment valueSegment;
-                if (isCheckbox) {
+                if (inputs[i].isCheckbox) {
                     valueSegment = arena.allocate(2); // 1 byte for the value and 1 byte for the null terminator
 
-                    var checkboxOptions = inputs[i].checkboxOptions;
                     var sb = new StringBuilder();
 
-                    for (String option : checkboxOptions) {
+                    for (String option : inputs[i].checkboxOptions) {
                         sb.append(option);
                         sb.append("\n");
                     }
@@ -64,10 +59,8 @@ public final class Terminal implements AutoCloseable {
                     valueSegment = arena.allocate(40);
                 }
 
-                var value = inputs[i].value;
-                byte[] valueBytes = value.getBytes();
-                int length = valueBytes.length;
-                MemorySegment.copy(valueBytes, 0, valueSegment, ValueLayout.JAVA_BYTE, 0, length);
+                byte[] valueBytes = inputs[i].value.getBytes();
+                MemorySegment.copy(valueBytes, 0, valueSegment, ValueLayout.JAVA_BYTE, 0, valueBytes.length);
                 Input.value(input, valueSegment);
 
             }
@@ -76,8 +69,7 @@ public final class Terminal implements AutoCloseable {
             // get the values back
             for (int i = 0; i < inputs.length; i++) {
                 MemorySegment input = Input.asSlice(inputsSegment, i);
-                var value = Input.value(input);
-                inputs[i].value = value.getString(0);
+                inputs[i].value = Input.value(input).getString(0);
             }
 
             return result;
@@ -92,8 +84,7 @@ public final class Terminal implements AutoCloseable {
         }
 
         try (var arena = Arena.ofConfined()) {
-            var strSegment = arena.allocateFrom(sb.toString());
-            return fuzzy_search_menu(strSegment);
+            return fuzzy_search_menu(arena.allocateFrom(sb.toString()));
         }
     }
 
