@@ -504,14 +504,26 @@ pub extern "C" fn fuzzy_search_menu(items: *const c_char) -> u8 {
 
     let stdout = get_stdout();
 
+    let y = add(
+        unsafe { TERM_SIZE.rows / 2 },
+        (items_length / 2) as i32 - items_length as i32 - 2, // -2 to leave space for the search bar
+    );
+
     loop {
         crossterm::queue!(stdout, terminal::Clear(terminal::ClearType::All)).unwrap();
-        write_centered_text(
-            &format!("Pesquisa: {}", search),
-            0,
-            0,
-            (items_length / 2) as i32 - items_length as i32 - 2,
-        );
+        let x = (unsafe { TERM_SIZE.cols } - 9 - search.len() as u16) / 2; // 9 is the length of "Pesquisa:"
+
+        // I am not using write_centered_text here because this way I can avoid allocating a new String
+        crossterm::queue!(
+            stdout,
+            cursor::MoveTo(x, y),
+            style::SetAttribute(style::Attribute::Underlined),
+            style::Print("Pesquisa:"),
+            style::SetAttribute(style::Attribute::Reset),
+            cursor::MoveTo(x + 10, y),
+            style::Print(&search)
+        )
+        .unwrap();
 
         filtered_items.clear();
         for &(item, i) in items.iter() {
