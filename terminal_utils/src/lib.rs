@@ -216,7 +216,6 @@ pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
 
         match read_key() {
             KeyCode::Up => {
-                // up
                 if selected > 0 {
                     selected -= 1;
                 } else {
@@ -224,7 +223,6 @@ pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
                 }
             }
             KeyCode::Down => {
-                // down
                 if selected < items_length - 1 {
                     selected += 1;
                 } else {
