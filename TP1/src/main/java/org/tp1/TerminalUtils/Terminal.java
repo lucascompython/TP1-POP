@@ -76,7 +76,7 @@ public final class Terminal implements AutoCloseable {
         }
     }
 
-    public byte fuzzyMenu(String[] options) {
+    public byte searchMenu(String[] options) {
         StringBuilder sb = new StringBuilder();
         for (String option : options) {
             sb.append(option);
@@ -84,7 +84,7 @@ public final class Terminal implements AutoCloseable {
         }
 
         try (var arena = Arena.ofConfined()) {
-            return fuzzy_search_menu(arena.allocateFrom(sb.toString()));
+            return search_menu(arena.allocateFrom(sb.toString()));
         }
     }
 

@@ -16,7 +16,7 @@ public final class ListMenus {
     void mainMenu() {
         var listOptions = new String[] { "Listar Trabalhador", "Listar Cliente", "Listar Arranjo", "Voltar" };
 
-        var listOption = terminal.fuzzyMenu(listOptions);
+        var listOption = terminal.searchMenu(listOptions);
 
         switch (listOption) {
             case 0 -> terminal.printCenteredAndWait("Listar Trabalhador", Color.GREEN, Style.BOLD);

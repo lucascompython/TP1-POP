@@ -486,7 +486,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
 }
 
 #[no_mangle]
-pub extern "C" fn fuzzy_search_menu(items: *const c_char) -> u8 {
+pub extern "C" fn search_menu(items: *const c_char) -> u8 {
     let items = unsafe { CStr::from_ptr(items) };
     let items = items.to_str().expect("Invalid UTF-8 text");
     let items: Vec<(&str, u8)> = items

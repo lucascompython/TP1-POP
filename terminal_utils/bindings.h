@@ -21,6 +21,6 @@ uint8_t arrow_menu(const char *items);
 
 bool input_menu(const struct Input *inputs, uint8_t inputs_length);
 
-uint8_t fuzzy_search_menu(const char *items);
+uint8_t search_menu(const char *items);
 
 #endif /* BINDINGS_H */
