@@ -84,6 +84,19 @@ public final class Terminal implements AutoCloseable {
         }
     }
 
+    public byte fuzzyMenu(String[] options) {
+        StringBuilder sb = new StringBuilder();
+        for (String option : options) {
+            sb.append(option);
+            sb.append("\n");
+        }
+
+        try (var arena = Arena.ofConfined()) {
+            var strSegment = arena.allocateFrom(sb.toString());
+            return fuzzy_search_menu(strSegment);
+        }
+    }
+
     @Override
     public void close() {
         deinit();

@@ -17,10 +17,10 @@ void deinit(void);
 
 void print_centered_and_wait(const char *text, uint8_t color, uint8_t style);
 
-void write_centered_text(const char *text, uint8_t color, uint8_t style, int32_t row_offset);
-
 uint8_t arrow_menu(const char *items);
 
 bool input_menu(const struct Input *inputs, uint8_t inputs_length);
+
+uint8_t fuzzy_search_menu(const char *items);
 
 #endif /* BINDINGS_H */

@@ -75,8 +75,8 @@ pub extern "C" fn print_centered_and_wait(text: *const c_char, color: u8, style:
 
     crossterm::queue!(stdout, terminal::Clear(terminal::ClearType::All)).unwrap();
 
-    _write_centered_text(text, color, style, -1);
-    _write_centered_text("Pressione qualquer tecla para continuar", 0, 4, 1);
+    write_centered_text(text, color, style, -1);
+    write_centered_text("Pressione qualquer tecla para continuar", 0, 4, 1);
     stdout.flush().unwrap();
 
     read_key();
@@ -124,7 +124,7 @@ fn add(u: u16, i: i32) -> u16 {
     }
 }
 
-fn _write_centered_text(text: &str, color: u8, style: u8, row_offset: i32) {
+fn write_centered_text(text: &str, color: u8, style: u8, row_offset: i32) {
     let y = add(unsafe { TERM_SIZE.rows / 2 }, row_offset);
     let x = (unsafe { TERM_SIZE.cols } - text.len() as u16) / 2;
 
@@ -156,15 +156,6 @@ fn _write_centered_text(text: &str, color: u8, style: u8, row_offset: i32) {
 }
 
 #[no_mangle]
-pub extern "C" fn write_centered_text(text: *const c_char, color: u8, style: u8, row_offset: i32) {
-    let text = unsafe { CStr::from_ptr(text) };
-    let text = text.to_str().expect("Invalid UTF-8 text");
-
-    _write_centered_text(text, color, style, row_offset);
-    get_stdout().flush().unwrap();
-}
-
-#[no_mangle]
 pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
     let items = unsafe { CStr::from_ptr(items) };
     let items = items.to_str().expect("Invalid UTF-8 text");
@@ -190,7 +181,7 @@ pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
 
             let offset = i as i32 - (items_length as i32 / 2);
 
-            _write_centered_text(item, 0, 0, offset);
+            write_centered_text(item, 0, 0, offset);
 
             if i == selected {
                 crossterm::queue!(stdout, style::ResetColor)
@@ -216,6 +207,17 @@ pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
                 }
             }
             KeyCode::Enter => return selected as u8, // enter
+
+            KeyCode::Char(c) => {
+                // Match the first item that contains the character
+                for (i, item) in items.iter().enumerate() {
+                    if item.contains(c) {
+                        selected = i;
+                        break;
+                    }
+                }
+            }
+
             _ => {}
         }
     }
@@ -371,7 +373,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
             button_text.push_str("                              [OK]   ");
             button_text.push_str(&"[CANCELAR]".black().on_white().to_string());
         };
-        _write_centered_text(&button_text, 0, 0, buttons_offset as i32);
+        write_centered_text(&button_text, 0, 0, buttons_offset as i32);
 
         stdout.flush().unwrap();
 
@@ -479,6 +481,94 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                     }
                 }
             }
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn fuzzy_search_menu(items: *const c_char) -> u8 {
+    let items = unsafe { CStr::from_ptr(items) };
+    let items = items.to_str().expect("Invalid UTF-8 text");
+    let items: Vec<(&str, u8)> = items
+        .lines()
+        .enumerate()
+        .map(|(i, item)| (item, i as u8))
+        .collect();
+
+    let items_length = items.len();
+
+    let mut filtered_items = Vec::with_capacity(items_length);
+
+    let mut selected = 0;
+    let mut search = String::new();
+
+    let stdout = get_stdout();
+
+    loop {
+        crossterm::queue!(stdout, terminal::Clear(terminal::ClearType::All)).unwrap();
+        write_centered_text(
+            &format!("Pesquisa: {}", search),
+            0,
+            0,
+            (items_length / 2) as i32 - items_length as i32 - 2,
+        );
+
+        filtered_items.clear();
+        for &(item, i) in items.iter() {
+            if item.contains(&search) {
+                filtered_items.push((item, i));
+            }
+        }
+
+        for (i, (item, _)) in filtered_items.iter().enumerate() {
+            if i == selected {
+                crossterm::queue!(
+                    stdout,
+                    style::SetForegroundColor(style::Color::Black),
+                    style::SetBackgroundColor(style::Color::White),
+                )
+                .expect("Unable to set color and style");
+            }
+
+            let offset = i as i32 - (items_length as i32 / 2);
+
+            write_centered_text(item, 0, 0, offset);
+
+            if i == selected {
+                crossterm::queue!(stdout, style::ResetColor)
+                    .expect("Unable to reset color and style");
+            }
+        }
+
+        stdout.flush().unwrap();
+
+        match read_key() {
+            KeyCode::Up => {
+                if selected > 0 {
+                    selected -= 1;
+                } else {
+                    selected = filtered_items.len() - 1;
+                }
+            }
+            KeyCode::Down => {
+                if selected < filtered_items.len() - 1 {
+                    selected += 1;
+                } else {
+                    selected = 0;
+                }
+            }
+
+            KeyCode::Backspace => {
+                search.pop();
+                selected = 0;
+            }
+
+            KeyCode::Enter => return filtered_items[selected].1, // return original index
+            KeyCode::Char(c) => {
+                search.push(c);
+                selected = 0;
+            }
+            _ => {}
         }
     }
 }
