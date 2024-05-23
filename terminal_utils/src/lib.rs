@@ -15,19 +15,6 @@ static mut STDOUT: Option<std::io::Stdout> = None;
 fn get_stdout() -> &'static mut std::io::Stdout {
     unsafe { STDOUT.as_mut().unwrap() }
 }
-
-macro_rules! print_lines {
-    ($text:expr $(, $arg:expr)*) => {
-        for line in $text.lines() {
-            crossterm::queue!(
-                get_stdout(),
-                $($arg,)*
-                style::Print(line),
-            )
-            .expect("Unable to print text");
-        }
-    };
-}
 struct TermSize {
     rows: u16,
     cols: u16,
@@ -141,30 +128,29 @@ fn _write_centered_text(text: &str, color: u8, style: u8, row_offset: i32) {
     let y = add(unsafe { TERM_SIZE.rows / 2 }, row_offset);
     let x = (unsafe { TERM_SIZE.cols } - text.len() as u16) / 2;
 
+    let stdout = get_stdout();
+
     if color != 0 {
         crossterm::queue!(
-            get_stdout(),
+            stdout,
             style::SetForegroundColor(convert_u8_to_color(color))
         )
         .expect("Unable to set color");
     }
 
     if style != 0 {
-        crossterm::queue!(
-            get_stdout(),
-            style::SetAttribute(convert_u8_to_style(style))
-        )
-        .expect("Unable to set style");
+        crossterm::queue!(stdout, style::SetAttribute(convert_u8_to_style(style)))
+            .expect("Unable to set style");
     }
 
-    print_lines!(text, cursor::MoveTo(x, y));
+    crossterm::queue!(stdout, cursor::MoveTo(x, y), style::Print(text)).unwrap();
 
     if color != 0 {
-        crossterm::queue!(get_stdout(), style::ResetColor).expect("Unable to reset color");
+        crossterm::queue!(stdout, style::ResetColor).expect("Unable to reset color");
     }
 
     if style != 0 {
-        crossterm::queue!(get_stdout(), style::SetAttribute(style::Attribute::Reset))
+        crossterm::queue!(stdout, style::SetAttribute(style::Attribute::Reset))
             .expect("Unable to reset style");
     }
 }
