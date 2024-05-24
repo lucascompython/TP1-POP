@@ -439,7 +439,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
 
             KeyCode::Enter => return selected_button, // enter
 
-            _ => {
+            KeyCode::Char(c) => {
                 if selected < inputs_length as usize && !inputs[selected].is_checkbox {
                     let input = &mut inputs[selected];
 
@@ -451,36 +451,48 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                             len += 1;
                         }
 
-                        if char == KeyCode::Backspace {
-                            if len > 0 {
-                                len -= 1;
-                                *value.add(len) = 0;
-
-                                // Clear the line when backspacing to avoid the '>' '<' artifacts
-                                crossterm::queue!(
-                                    stdout,
-                                    cursor::MoveTo(
-                                        0,
-                                        y - (inputs_length as u16 / 2) + selected as u16
-                                            - checkbox_length as u16
-                                            + 1
-                                    ),
-                                    terminal::Clear(terminal::ClearType::CurrentLine)
-                                )
-                                .unwrap();
-                            }
-                        } else {
-                            if len + 2 <= 40 {
-                                *value.add(len) = match char {
-                                    KeyCode::Char(c) => c as u8,
-                                    _ => 0,
-                                };
-                                *value.add(len + 1) = 0;
-                            }
+                        if len + 2 <= 40 {
+                            *value.add(len) = c as u8;
+                            *value.add(len + 1) = 0;
                         }
                     }
                 }
             }
+
+            KeyCode::Backspace => {
+                if selected < inputs_length as usize && !inputs[selected].is_checkbox {
+                    let input = &mut inputs[selected];
+
+                    unsafe {
+                        let value = input.value as *mut u8;
+
+                        let mut len = 0;
+                        while *value.add(len) != 0 {
+                            len += 1;
+                        }
+
+                        if len > 0 {
+                            len -= 1;
+                            *value.add(len) = 0;
+
+                            // Clear the line when backspacing to avoid the '>' '<' artifacts
+                            crossterm::queue!(
+                                stdout,
+                                cursor::MoveTo(
+                                    0,
+                                    y - (inputs_length as u16 / 2) + selected as u16
+                                        - checkbox_length as u16
+                                        + 1
+                                ),
+                                terminal::Clear(terminal::ClearType::CurrentLine)
+                            )
+                            .unwrap();
+                        }
+                    }
+                }
+            }
+
+            _ => {}
         }
     }
 }
