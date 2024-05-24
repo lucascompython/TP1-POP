@@ -19,7 +19,7 @@ public final class MainMenu {
             this.terminal = terminal;
 
             this.registerMenus = new RegisterMenus(this, terminal, workers, clients);
-            this.listMenus = new ListMenus(this, terminal);
+            this.listMenus = new ListMenus(this, terminal, workers, clients);
 
             terminal.printCenteredAndWait("Bem vindo ao sistema de gestão da oficina!", Color.GREEN, Style.BOLD);
             mainMenu();

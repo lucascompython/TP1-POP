@@ -1,3 +1,6 @@
+// TODO: see the return types of the exposed functions
+// TODO: add alt key support for changing the buttons (OK/Cancel and Text/ID)
+
 use std::ffi::{c_char, CStr};
 use std::io::{stdout, Write};
 
@@ -192,14 +195,14 @@ pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
         stdout.flush().unwrap();
 
         match read_key() {
-            KeyCode::Up => {
+            KeyCode::Up | KeyCode::BackTab => {
                 if selected > 0 {
                     selected -= 1;
                 } else {
                     selected = items_length - 1;
                 }
             }
-            KeyCode::Down => {
+            KeyCode::Down | KeyCode::Tab => {
                 if selected < items_length - 1 {
                     selected += 1;
                 } else {
@@ -379,7 +382,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
 
         let char = read_key();
         match char {
-            KeyCode::Up => {
+            KeyCode::Up | KeyCode::BackTab => {
                 if selected > 0 {
                     selected -= 1;
                 } else {
@@ -387,7 +390,7 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
                 }
             }
 
-            KeyCode::Down => {
+            KeyCode::Down | KeyCode::Tab => {
                 if selected < inputs_length as usize + checkbox_length as usize - 1 {
                     selected += 1;
                 } else {
@@ -497,6 +500,12 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
     }
 }
 
+#[repr(C)]
+pub struct SearchInput {
+    pub id: i32,
+    pub text: *const c_char,
+}
+
 #[no_mangle]
 pub extern "C" fn search_menu(items: *const c_char) -> u8 {
     let items = unsafe { CStr::from_ptr(items) };
@@ -567,19 +576,163 @@ pub extern "C" fn search_menu(items: *const c_char) -> u8 {
         stdout.flush().unwrap();
 
         match read_key() {
-            KeyCode::Up => {
+            KeyCode::Up | KeyCode::BackTab => {
                 if selected > 0 {
                     selected -= 1;
                 } else {
                     selected = filtered_items.len() - 1;
                 }
             }
-            KeyCode::Down => {
+            KeyCode::Down | KeyCode::Tab => {
                 if selected < filtered_items.len() - 1 {
                     selected += 1;
                 } else {
                     selected = 0;
                 }
+            }
+
+            KeyCode::Backspace => {
+                search.pop();
+                selected = 0;
+            }
+
+            KeyCode::Enter => return filtered_items[selected].1, // return original index
+            KeyCode::Char(c) => {
+                search.push(c);
+                selected = 0;
+            }
+            _ => {}
+        }
+    }
+}
+
+// This function is similar to search_menu, but the user can search by id or by text
+// The search mode is chosen but two buttons like the Ok and Cancel buttons in input_menu
+// When the mode is text, it will display the text of the items and the user searches by text
+// When the mode is id, it will display the id of the items and the user searches by id
+// The function returns the id of the selected item
+
+#[no_mangle]
+pub extern "C" fn search_menu_by_id_or_text(items: *const SearchInput, items_length: u8) -> i32 {
+    let items: &mut [SearchInput] =
+        unsafe { std::slice::from_raw_parts_mut(items as *mut SearchInput, items_length as usize) };
+
+    let stdout = get_stdout();
+
+    let mut selected = 0;
+    let mut search = String::new();
+    let mut search_by_text = true;
+
+    let mut button_text = String::with_capacity(76);
+
+    let mut filtered_items = Vec::with_capacity(items_length as usize);
+
+    let buttons_offset = (items_length + 1) / 2 + 2; // + 2 to leave a space between the inputs and the buttons
+
+    let y = add(
+        unsafe { TERM_SIZE.rows / 2 },
+        (items_length / 2) as i32 - items_length as i32 - 2,
+    ); // -2 to leave space for the search bar
+
+    loop {
+        crossterm::queue!(stdout, terminal::Clear(terminal::ClearType::All)).unwrap();
+        let x = (unsafe { TERM_SIZE.cols } - 9 - search.len() as u16) / 2; // 9 is the length of "Pesquisa:"
+
+        // I am not using write_centered_text here because this way I can avoid allocating a new String by not using format!
+        crossterm::queue!(
+            stdout,
+            cursor::MoveTo(x, y),
+            style::SetAttribute(style::Attribute::Underlined),
+            style::Print("Pesquisa:"),
+            style::SetAttribute(style::Attribute::Reset),
+            cursor::MoveTo(x + 10, y),
+            style::Print(&search)
+        )
+        .unwrap();
+
+        filtered_items.clear();
+        for item in items.iter() {
+            let text = unsafe { CStr::from_ptr(item.text) }
+                .to_str()
+                .expect("Invalid UTF-8 text");
+
+            if search_by_text {
+                if text.contains(&search) {
+                    filtered_items.push((text, item.id));
+                }
+            } else {
+                if item.id.to_string().contains(&search) {
+                    filtered_items.push((text, item.id));
+                }
+            }
+        }
+
+        for (i, (item, id)) in filtered_items.iter().enumerate() {
+            if i == selected {
+                crossterm::queue!(
+                    stdout,
+                    style::SetForegroundColor(style::Color::Black),
+                    style::SetBackgroundColor(style::Color::White),
+                )
+                .expect("Unable to set color and style");
+            }
+
+            let offset = i as i32 - (items_length as i32 / 2);
+
+            if search_by_text {
+                write_centered_text(item, 0, 0, offset);
+            } else {
+                // Do this to avoid allocating a new String each iteration
+                let len = if *id > 9 { 2 } else { 1 };
+                let y = add(unsafe { TERM_SIZE.rows / 2 }, offset);
+                crossterm::queue!(
+                    stdout,
+                    cursor::MoveTo(unsafe { TERM_SIZE.cols / 2 } - len as u16, y),
+                    style::Print(id)
+                )
+                .unwrap();
+            }
+
+            if i == selected {
+                crossterm::queue!(stdout, style::ResetColor)
+                    .expect("Unable to reset color and style");
+            }
+        }
+
+        // Do this to avoid allocating a new String each iteration
+        if search_by_text {
+            button_text.clear();
+            button_text.push_str("                              ");
+            button_text.push_str(&"[Texto]".black().on_white().to_string());
+            button_text.push_str("   [ID]");
+        } else {
+            button_text.clear();
+            button_text.push_str("                              [Texto]   ");
+            button_text.push_str(&"[ID]".black().on_white().to_string());
+        };
+        write_centered_text(&button_text, 0, 0, buttons_offset as i32);
+
+        stdout.flush().unwrap();
+
+        match read_key() {
+            KeyCode::Up | KeyCode::BackTab => {
+                if selected > 0 {
+                    selected -= 1;
+                } else {
+                    selected = filtered_items.len() - 1;
+                }
+            }
+
+            KeyCode::Down | KeyCode::Tab => {
+                if selected < filtered_items.len() - 1 {
+                    selected += 1;
+                } else {
+                    selected = 0;
+                }
+            }
+
+            KeyCode::Left | KeyCode::Right => {
+                search_by_text = !search_by_text;
             }
 
             KeyCode::Backspace => {

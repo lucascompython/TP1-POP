@@ -88,6 +88,22 @@ public final class Terminal implements AutoCloseable {
         }
     }
 
+    public int searchByIdOrNameMenu(SearchItem[] items) {
+        try (var arena = Arena.ofConfined()) {
+            var itemsSegment = SearchInput.allocateArray(items.length, arena);
+
+            for (int i = 0; i < items.length; i++) {
+                MemorySegment item = SearchInput.asSlice(itemsSegment, i);
+
+                SearchInput.id(item, items[i].id);
+                SearchInput.text(item, arena.allocateFrom(items[i].name));
+            }
+
+            return search_menu_by_id_or_text(itemsSegment, (byte) items.length);
+        }
+
+    }
+
     @Override
     public void close() {
         deinit();
