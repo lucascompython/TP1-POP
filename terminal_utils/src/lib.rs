@@ -606,12 +606,6 @@ pub extern "C" fn search_menu(items: *const c_char) -> u8 {
     }
 }
 
-// This function is similar to search_menu, but the user can search by id or by text
-// The search mode is chosen but two buttons like the Ok and Cancel buttons in input_menu
-// When the mode is text, it will display the text of the items and the user searches by text
-// When the mode is id, it will display the id of the items and the user searches by id
-// The function returns the id of the selected item
-
 #[no_mangle]
 pub extern "C" fn search_menu_by_id_or_text(items: *const SearchInput, items_length: u8) -> i32 {
     let items: &mut [SearchInput] =
