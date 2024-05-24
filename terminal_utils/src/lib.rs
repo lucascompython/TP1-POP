@@ -617,7 +617,7 @@ pub extern "C" fn search_menu_by_id_or_text(items: *const SearchInput, items_len
     let mut search = String::new();
     let mut search_by_text = true;
 
-    let mut button_text = String::with_capacity(76);
+    let mut button_text = String::with_capacity(73);
 
     let mut filtered_items = Vec::with_capacity(items_length as usize);
 
