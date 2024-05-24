@@ -655,7 +655,7 @@ pub extern "C" fn search_menu_by_id_or_text(items: *const SearchInput, items_len
                     filtered_items.push((text, item.id));
                 }
             } else {
-                if item.id.to_string().contains(&search) {
+                if search.is_empty() || item.id == search.parse().unwrap_or(-1) {
                     filtered_items.push((text, item.id));
                 }
             }
