@@ -3,6 +3,7 @@ package org.tp1;
 import org.tp1.Menu.MainMenu;
 import org.tp1.Workshop.Client;
 import org.tp1.Workshop.Worker;
+import org.tp1.Workshop.Repair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +13,9 @@ public final class Main {
 
         List<Worker> workers = new ArrayList<>();
         List<Client> clients = new ArrayList<>();
+        List<Repair> repairs = new ArrayList<>();
 
-        new MainMenu(workers, clients);
+        new MainMenu(workers, clients, repairs);
 
         // try {
         // var w1 = new Worker("joao", Role.MANAGER, 1000, new

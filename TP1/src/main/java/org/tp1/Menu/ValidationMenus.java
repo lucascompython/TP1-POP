@@ -3,9 +3,13 @@ package org.tp1.Menu;
 import org.tp1.TerminalUtils.Color;
 import org.tp1.TerminalUtils.InputItem;
 import org.tp1.TerminalUtils.Style;
+import org.tp1.Workshop.CarRegistration;
 import org.tp1.Workshop.Contact;
 import org.tp1.Workshop.NIF;
 import org.tp1.TerminalUtils.Terminal;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public final class ValidationMenus {
 
@@ -76,6 +80,64 @@ public final class ValidationMenus {
                     return;
                 }
             }
+        }
+    }
+
+    static void validatePrice(InputItem[] inputItems, Terminal terminal, MainMenu mainMenuInstance) {
+        while (true) {
+            try {
+                if (Float.parseFloat(inputItems[4].value) >= 0) {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                // Do nothing
+            }
+            terminal.printCenteredAndWait("Preço inválido!", Color.RED, Style.BOLD);
+            var priceInput = new InputItem("Preço (€)", inputItems[4].value);
+            var result = terminal.inputMenu(new InputItem[] { priceInput });
+            if (!result) {
+                mainMenuInstance.mainMenu();
+                return;
+            }
+            inputItems[4].value = priceInput.value;
+        }
+    }
+
+    static void validateCarRegistration(InputItem[] inputItems, Terminal terminal, MainMenu mainMenuInstance) {
+        while (!CarRegistration.validateRegistration(inputItems[0].value)) {
+            terminal.printCenteredAndWait("Matrícula inválida!", Color.RED, Style.BOLD);
+            var registrationInput = new InputItem("Matrícula", inputItems[0].value);
+            var result = terminal.inputMenu(new InputItem[] { registrationInput });
+            if (!result) {
+                mainMenuInstance.mainMenu();
+                return;
+            }
+            inputItems[0].value = registrationInput.value;
+        }
+    }
+
+    static void validateDates(InputItem[] inputItems, Terminal terminal, MainMenu mainMenuInstance) {
+        var formatter = java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        while (true) {
+            try {
+                var startDate = LocalDate.parse(inputItems[5].value, formatter);
+                var endDate = LocalDate.parse(inputItems[6].value, formatter);
+                if (startDate.isBefore(endDate)) {
+                    break;
+                }
+            } catch (DateTimeParseException e) {
+                // Do nothing
+            }
+            terminal.printCenteredAndWait("Datas inválidas!", Color.RED, Style.BOLD);
+            var startDateInput = new InputItem("Data de início (dd-MM-yyyy)", inputItems[5].value);
+            var endDateInput = new InputItem("Data de fim (dd-MM-yyyy)", inputItems[6].value);
+            var result = terminal.inputMenu(new InputItem[] { startDateInput, endDateInput });
+            if (!result) {
+                mainMenuInstance.mainMenu();
+                return;
+            }
+            inputItems[5].value = startDateInput.value;
+            inputItems[6].value = endDateInput.value;
         }
     }
 

@@ -1,6 +1,6 @@
 package org.tp1.Workshop;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public final class Repair {
     public static int count = 0;
@@ -11,11 +11,11 @@ public final class Repair {
     private final int clientId;
     private final String description;
     private final float price;
-    private final LocalDateTime entryDate;
-    private LocalDateTime exitDate;
+    private final LocalDate entryDate;
+    private LocalDate exitDate;
 
-    public Repair(CarRegistration carRegistration, VehicleType vehicleType, int workerId, int clientId,
-            String description, float price, LocalDateTime entryDate, LocalDateTime exitDate) {
+    public Repair(CarRegistration carRegistration, int workerId, int clientId, String description, float price,
+            LocalDate entryDate, LocalDate exitDate, VehicleType vehicleType) {
         this.id = ++count;
         this.carRegistration = carRegistration;
         this.vehicleType = vehicleType;
@@ -55,15 +55,15 @@ public final class Repair {
         return price;
     }
 
-    public LocalDateTime getEntryDate() {
+    public LocalDate getEntryDate() {
         return entryDate;
     }
 
-    public LocalDateTime getExitDate() {
+    public LocalDate getExitDate() {
         return exitDate;
     }
 
-    public void setExitDate(LocalDateTime exitDate) {
+    public void setExitDate(LocalDate exitDate) {
         this.exitDate = exitDate;
     }
 

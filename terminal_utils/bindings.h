@@ -4,17 +4,20 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef struct SearchInput {
+  int32_t id;
+  const char *text;
+} SearchInput;
+
 typedef struct Input {
   const char *label;
   const char *value;
   bool is_checkbox;
   const char *checkbox_options;
+  bool is_search_input;
+  const struct SearchInput *search_inputs;
+  uint8_t search_inputs_length;
 } Input;
-
-typedef struct SearchInput {
-  int32_t id;
-  const char *text;
-} SearchInput;
 
 void init(void);
 

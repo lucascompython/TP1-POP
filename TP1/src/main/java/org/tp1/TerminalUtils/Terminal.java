@@ -47,6 +47,7 @@ public final class Terminal implements AutoCloseable {
                 Input.label(input, arena.allocateFrom(inputs[i].label));
 
                 Input.is_checkbox(input, inputs[i].isCheckbox);
+                Input.is_search_input(input, inputs[i].isSearchInput);
 
                 MemorySegment valueSegment;
                 if (inputs[i].isCheckbox) {
@@ -61,6 +62,21 @@ public final class Terminal implements AutoCloseable {
 
                     var checkboxOptionsSegment = arena.allocateFrom(sb.toString());
                     Input.checkbox_options(input, checkboxOptionsSegment);
+                } else if (inputs[i].isSearchInput) {
+                    valueSegment = arena.allocate(3); // 2 bytes for the value and 1 byte for the null terminator
+                    var length = inputs[i].searchItems.length;
+
+                    var searchItemsSegment = SearchInput.allocateArray(length, arena);
+
+                    for (int j = 0; j < length; j++) {
+                        MemorySegment item = SearchInput.asSlice(searchItemsSegment, j);
+                        SearchInput.id(item, inputs[i].searchItems[j].id);
+                        SearchInput.text(item, arena.allocateFrom(inputs[i].searchItems[j].name));
+                    }
+
+                    Input.search_inputs(input, searchItemsSegment);
+                    Input.search_inputs_length(input, (byte) length);
+
                 } else {
                     valueSegment = arena.allocate(40);
                 }

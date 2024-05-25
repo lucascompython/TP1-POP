@@ -271,16 +271,30 @@ pub struct Input {
     pub value: *const c_char,
     pub is_checkbox: bool,
     pub checkbox_options: *const c_char, // Multiple options separated by newlines
+    pub is_search_input: bool,
+    pub search_inputs: *const SearchInput,
+    pub search_inputs_length: u8,
 }
 
-fn print_menu_item(label: &str, value: &str, is_checkbox: bool, selected: bool, offset: i32) {
+fn print_menu_item(
+    label: &str,
+    value: &str,
+    is_checkbox: bool,
+    is_search_input: bool,
+    selected: bool,
+    offset: i32,
+) {
     let y = add(unsafe { TERM_SIZE.rows / 2 }, offset);
-    let x = (unsafe { TERM_SIZE.cols } - label.len() as u16 - value.len() as u16) / 2;
+    let x = if is_checkbox || is_search_input {
+        (unsafe { TERM_SIZE.cols } - label.len() as u16) / 2
+    } else {
+        (unsafe { TERM_SIZE.cols } - label.len() as u16 - value.len() as u16) / 2
+    };
 
     // I am using write! here because this way I don't need to allocate a new String
     if selected {
         if is_checkbox {
-            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 2, y),).unwrap();
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
             write!(
                 get_stdout(),
                 "> {}{}{} <",
@@ -289,17 +303,39 @@ fn print_menu_item(label: &str, value: &str, is_checkbox: bool, selected: bool, 
                 style::Attribute::NoUnderline
             )
             .unwrap();
+        } else if is_search_input {
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 4, y)).unwrap();
+            write!(
+                get_stdout(),
+                "> {}{}{}: {} <",
+                style::SetAttribute(style::Attribute::Bold),
+                label,
+                style::SetAttribute(style::Attribute::NoBold),
+                value,
+            )
+            .unwrap();
         } else {
-            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 4, y),).unwrap();
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 4, y)).unwrap();
             write!(get_stdout(), "> {}: {} <", label, value).unwrap();
         }
     } else {
         if is_checkbox {
-            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 2, y),).unwrap();
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 2, y)).unwrap();
 
             write!(get_stdout(), "  {}  ", label.underlined()).unwrap();
+        } else if is_search_input {
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 4, y)).unwrap();
+            write!(
+                get_stdout(),
+                "  {}{}{}: {}  ",
+                style::SetAttribute(style::Attribute::Bold),
+                label,
+                style::SetAttribute(style::Attribute::NoBold),
+                value,
+            )
+            .unwrap();
         } else {
-            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 4, y),).unwrap();
+            crossterm::queue!(get_stdout(), cursor::MoveTo(x - 4, y)).unwrap();
             write!(get_stdout(), "  {}: {}  ", label, value).unwrap();
         }
     }
@@ -384,21 +420,22 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
 
             let value = unsafe { CStr::from_ptr(input.value) }.to_str().unwrap();
 
-            print_menu_item(label, value, input.is_checkbox, i == selected, offset);
+            print_menu_item(
+                label,
+                value,
+                input.is_checkbox,
+                input.is_search_input,
+                i == selected,
+                offset,
+            );
 
             if input.is_checkbox {
                 for (j, option) in checkbox_options.iter().enumerate() {
-                    let offset = if inputs_length >= 2 {
-                        (i as i32 + 1) - (checkbox_length as i32 / 2) + j as i32
-                            - checkbox_length as i32
-                    } else {
-                        (i as i32) - (checkbox_length as i32 / 2) + j as i32
-                    };
                     print_checkbox_option(
                         option,
                         selected as i32 - inputs_length as i32 == j as i32,
                         j as i32 == selected_checkbox,
-                        offset,
+                        offset + j as i32 + 1,
                     );
                 }
             }
@@ -442,8 +479,35 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
             }
 
             KeyCode::Char(' ') => {
-                if selected < inputs_length as usize && inputs[selected].is_checkbox {
-                    continue;
+                if selected < inputs_length as usize {
+                    if inputs[selected].is_checkbox {
+                        continue;
+                    }
+
+                    if inputs[selected].is_search_input {
+                        let search_inputs = unsafe {
+                            std::slice::from_raw_parts(
+                                inputs[selected].search_inputs,
+                                inputs_length as usize,
+                            )
+                        };
+
+                        let search_input_index = search_menu_by_id_or_text(
+                            inputs[selected].search_inputs,
+                            inputs[selected].search_inputs_length,
+                        );
+
+                        crossterm::queue!(stdout, terminal::Clear(terminal::ClearType::All))
+                            .unwrap();
+
+                        let input = &mut inputs[selected];
+                        let id = search_inputs[search_input_index as usize].id;
+                        unsafe {
+                            let value = input.value as *mut u8;
+                            *value = id as u8 + b'0';
+                            *value.add(1) = 0;
+                        }
+                    }
                 }
 
                 if selected > inputs_length as usize - 1 {
@@ -482,7 +546,10 @@ pub extern "C" fn input_menu(inputs: *const Input, inputs_length: u8) -> bool {
             KeyCode::Enter => return selected_button, // enter
 
             KeyCode::Char(c) => {
-                if selected < inputs_length as usize && !inputs[selected].is_checkbox {
+                if selected < inputs_length as usize
+                    && !inputs[selected].is_checkbox
+                    && !inputs[selected].is_search_input
+                {
                     let input = &mut inputs[selected];
 
                     unsafe {
