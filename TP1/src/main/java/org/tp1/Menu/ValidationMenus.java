@@ -47,7 +47,15 @@ public final class ValidationMenus {
     }
 
     static void validateSalary(InputItem[] inputItems, Terminal terminal, MainMenu mainMenuInstance) {
-        while (Float.parseFloat(inputItems[1].value) < 0) {
+        while (true) {
+            try {
+                if (Float.parseFloat(inputItems[1].value) >= 0) {
+                    break;
+                }
+            }
+            catch (NumberFormatException e) {
+                // Do nothing
+            }
             terminal.printCenteredAndWait("Salário inválido!", Color.RED, Style.BOLD);
             var salaryInput = new InputItem("Salário (€)", inputItems[1].value);
             var result = terminal.inputMenu(new InputItem[] { salaryInput });
