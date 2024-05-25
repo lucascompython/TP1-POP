@@ -30,12 +30,49 @@ public final class ListMenus {
         switch (listOption) {
             case 0 -> listWorker();
 
-            case 1 -> terminal.printCenteredAndWait("Listar Cliente", Color.GREEN, Style.BOLD);
+            case 1 -> listClient();
 
             case 2 -> terminal.printCenteredAndWait("Listar Arranjo", Color.GREEN, Style.BOLD);
 
             case 3 -> mainMenuInstance.mainMenu();
         }
+    }
+
+    private void listClient() {
+        var clientsSize = clients.size();
+
+        if (clientsSize == 0) {
+            terminal.printCenteredAndWait("Não existem clientes registados!", Color.RED, Style.BOLD);
+            mainMenuInstance.mainMenu();
+            return;
+        }
+
+        SearchItem[] searchItems = new SearchItem[clientsSize];
+
+        for (int i = 0; i < clientsSize; i++) {
+            var client = clients.get(i);
+            searchItems[i] = new SearchItem(client.getId(), client.getName());
+        }
+
+        var clientIndex = terminal.searchByIdOrNameMenu(searchItems);
+
+        var client = clients.get(clientIndex);
+
+        String infoString = "Nome: " +
+                client.getName() +
+                "\nID: " +
+                client.getId() +
+                "\nNIF: " +
+                client.getNIF().to_string() +
+                "\nEmail: " +
+                client.getContact().email() +
+                "\nTelefone: " +
+                client.getContact().phone();
+
+        terminal.printCenteredLinesAndWait(infoString, Color.GREEN, Style.BOLD);
+
+        mainMenuInstance.mainMenu();
+
     }
 
     private void listWorker() {
