@@ -30,7 +30,6 @@ public final class ListMenus {
         switch (listOption) {
             case 0 -> listWorker();
 
-
             case 1 -> terminal.printCenteredAndWait("Listar Cliente", Color.GREEN, Style.BOLD);
 
             case 2 -> terminal.printCenteredAndWait("Listar Arranjo", Color.GREEN, Style.BOLD);
@@ -39,17 +38,42 @@ public final class ListMenus {
         }
     }
 
-
     private void listWorker() {
-        SearchItem[] searchItems = new SearchItem[workers.size()];
-        for (int i = 0; i < workers.size(); i++) {
-            searchItems[i] = new SearchItem(i, workers.get(i).getName());
+        var workersSize = workers.size();
+
+        if (workersSize == 0) {
+            terminal.printCenteredAndWait("Não existem trabalhadores registados!", Color.RED, Style.BOLD);
+            mainMenuInstance.mainMenu();
+            return;
+        }
+
+        SearchItem[] searchItems = new SearchItem[workersSize];
+
+        for (int i = 0; i < workersSize; i++) {
+            var worker = workers.get(i);
+            searchItems[i] = new SearchItem(worker.getId(), worker.getName());
         }
 
         var workerIndex = terminal.searchByIdOrNameMenu(searchItems);
 
-        terminal.printCenteredAndWait("ola: " + workerIndex, Color.GREEN, Style.BOLD);
+        var worker = workers.get(workerIndex);
 
+        String infoString = "Nome: " +
+                worker.getName() +
+                "\nID: " +
+                worker.getId() +
+                "\nCargo: " +
+                worker.getRole().toString() +
+                "\nSalário: " +
+                worker.getSalary() +
+                "\nEmail: " +
+                worker.getContact().email() +
+                "\nTelefone: " +
+                worker.getContact().phone();
+
+        terminal.printCenteredLinesAndWait(infoString, Color.GREEN, Style.BOLD);
+
+        mainMenuInstance.mainMenu();
 
     }
 }

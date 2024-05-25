@@ -22,6 +22,8 @@ void deinit(void);
 
 void print_centered_and_wait(const char *text, uint8_t color, uint8_t style);
 
+void print_centered_lines_and_wait(const char *text);
+
 uint8_t arrow_menu(const char *items);
 
 bool input_menu(const struct Input *inputs, uint8_t inputs_length);

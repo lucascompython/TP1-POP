@@ -16,4 +16,13 @@ public enum Role {
             default -> throw new IllegalArgumentException("Invalid role");
         };
     }
+
+    @Override
+    public String toString() {
+        return switch (this) {
+            case MECHANIC -> "Mecânico";
+            case MANAGER -> "Gerente";
+            case RECEPTIONIST -> "Rececionista";
+        };
+    }
 }

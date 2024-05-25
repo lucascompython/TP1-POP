@@ -159,6 +159,45 @@ fn write_centered_text(text: &str, color: u8, style: u8, row_offset: i32) {
 }
 
 #[no_mangle]
+pub extern "C" fn print_centered_lines_and_wait(text: *const c_char) {
+    let text = unsafe { CStr::from_ptr(text) };
+    let text = text.to_str().expect("Invalid UTF-8 text");
+
+    let text_lines = text.lines();
+    let lines_count = &text_lines.count();
+
+    let stdout = get_stdout();
+
+    crossterm::queue!(stdout, terminal::Clear(terminal::ClearType::All)).unwrap();
+
+    for (i, line) in text.lines().enumerate() {
+        let x = (unsafe { TERM_SIZE.cols } - line.len() as u16) / 2;
+        let y = add(
+            unsafe { TERM_SIZE.rows / 2 },
+            i as i32 - (*lines_count as i32 / 2),
+        );
+
+        crossterm::queue!(stdout, cursor::MoveTo(x, y), style::Print(line)).unwrap();
+    }
+
+    let x = (unsafe { TERM_SIZE.cols } - 39) / 2; // 39 is the length of "Pressione qualquer tecla para continuar"
+    let y = add(unsafe { TERM_SIZE.rows / 2 }, (*lines_count as i32 / 2) + 1);
+
+    crossterm::queue!(
+        stdout,
+        cursor::MoveTo(x, y),
+        style::SetAttribute(style::Attribute::Underlined),
+        style::Print("Pressione qualquer tecla para continuar"),
+        style::SetAttribute(style::Attribute::Reset),
+    )
+    .unwrap();
+
+    stdout.flush().unwrap();
+
+    read_key();
+}
+
+#[no_mangle]
 pub extern "C" fn arrow_menu(items: *const c_char) -> u8 {
     let items = unsafe { CStr::from_ptr(items) };
     let items = items.to_str().expect("Invalid UTF-8 text");
@@ -619,7 +658,7 @@ pub extern "C" fn search_menu_by_id_or_text(items: *const SearchInput, items_len
 
     let mut button_text = String::with_capacity(73);
 
-    let mut filtered_items = Vec::with_capacity(items_length as usize);
+    let mut filtered_items = Vec::new();
 
     let buttons_offset = (items_length + 1) / 2 + 2; // + 2 to leave a space between the inputs and the buttons
 
@@ -645,23 +684,32 @@ pub extern "C" fn search_menu_by_id_or_text(items: *const SearchInput, items_len
         .unwrap();
 
         filtered_items.clear();
-        for item in items.iter() {
+
+        let search_int = if search_by_text {
+            -1
+        } else {
+            search.parse().unwrap_or(-1)
+        };
+
+        let is_search_empty = search.is_empty();
+
+        for (index, item) in items.iter().enumerate() {
             let text = unsafe { CStr::from_ptr(item.text) }
                 .to_str()
                 .expect("Invalid UTF-8 text");
 
             if search_by_text {
                 if text.contains(&search) {
-                    filtered_items.push((text, item.id));
+                    filtered_items.push((text, item.id, index));
                 }
             } else {
-                if search.is_empty() || item.id == search.parse().unwrap_or(-1) {
-                    filtered_items.push((text, item.id));
+                if is_search_empty || item.id == search_int {
+                    filtered_items.push((text, item.id, index));
                 }
             }
         }
 
-        for (i, (item, id)) in filtered_items.iter().enumerate() {
+        for (i, (item, id, _)) in filtered_items.iter().enumerate() {
             if i == selected {
                 crossterm::queue!(
                     stdout,
@@ -734,7 +782,7 @@ pub extern "C" fn search_menu_by_id_or_text(items: *const SearchInput, items_len
                 selected = 0;
             }
 
-            KeyCode::Enter => return filtered_items[selected].1, // return original index
+            KeyCode::Enter => return filtered_items[selected].2 as i32, // return original index
             KeyCode::Char(c) => {
                 search.push(c);
                 selected = 0;
