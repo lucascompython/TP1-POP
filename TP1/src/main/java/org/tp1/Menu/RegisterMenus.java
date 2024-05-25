@@ -14,7 +14,7 @@ public final class RegisterMenus {
     private final List<Client> clients;
     private final MainMenu mainMenuInstance;
 
-   RegisterMenus(MainMenu mainMenuInstance, Terminal terminal, List<Worker> workers, List<Client> clients) {
+    RegisterMenus(MainMenu mainMenuInstance, Terminal terminal, List<Worker> workers, List<Client> clients) {
         this.mainMenuInstance = mainMenuInstance;
         this.terminal = terminal;
         this.workers = workers;

@@ -52,8 +52,7 @@ public final class ValidationMenus {
                 if (Float.parseFloat(inputItems[1].value) >= 0) {
                     break;
                 }
-            }
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 // Do nothing
             }
             terminal.printCenteredAndWait("Salário inválido!", Color.RED, Style.BOLD);
