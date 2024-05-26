@@ -35,11 +35,45 @@ public final class StatisticsMenus {
             case 0 -> repairsByClient();
             case 1 -> repairsBetweenDates();
             case 2 -> totalRepairsPrice();
-            // case 3 -> repairsPriceByClient();
+             case 3 -> repairsPriceByClient();
             // case 4 -> extremeRepairsPrice();
             // case 5 -> calculateTaxes();
             case 6 -> mainMenuInstance.mainMenu();
         }
+    }
+
+
+    private void repairsPriceByClient() {
+        var clientsSize = clients.size();
+
+        if (clientsSize == 0) {
+            terminal.printCenteredAndWait("Não existem clientes registados!", Color.RED, Style.BOLD);
+            mainMenuInstance.mainMenu();
+            return;
+        }
+
+        SearchItem[] clientsSearchItems = new SearchItem[clientsSize];
+        for (int i = 0; i < clientsSize; i++) {
+            var client = clients.get(i);
+            clientsSearchItems[i] = new SearchItem(client.getId(), client.getName());
+        }
+
+        var clientIndex = terminal.searchByIdOrNameMenu(clientsSearchItems);
+
+        var client = clients.get(clientIndex);
+
+        var clientRepairs = repairs.stream().filter(repair -> repair.getClientId() == client.getId()).toList();
+
+        if (clientRepairs.isEmpty()) {
+            terminal.printCenteredAndWait("O cliente não tem arranjos registados!", Color.RED, Style.BOLD);
+            mainMenuInstance.mainMenu();
+            return;
+        }
+
+        var totalClientRepairsPrice = clientRepairs.stream().mapToDouble(Repair::getPrice).sum();
+
+        terminal.printCenteredAndWait("Preço total dos arranjos do cliente " + client.getName() + ": " + totalClientRepairsPrice + "€", Color.GREEN, Style.BOLD);
+        mainMenuInstance.mainMenu();
     }
 
 
