@@ -6,7 +6,7 @@ Para fazer uma interface decente, tive que usar uma linguagem de baixo nível pa
 
 A biblioteca em Rust "comunica" com a JVM usando o API [FFM](https://openjdk.org/jeps/454) introduzido no JDK 22.
 
-Usei também a ferramenta [Jextract](https://jdk.java.net/jextract/) para gerar automaticamente "bindings" em Java ao ler um header em C. O Jextract roda a cada build (ver o [ficheiro de build do Gradle](/TP1/build.gradle.kts#L25)).  
+Usei também a ferramenta [Jextract](https://jdk.java.net/jextract/) para gerar automaticamente "bindings" em Java ao ler um header em C. O Jextract roda a cada build (ver o [ficheiro de build do Gradle](/TP1/build.gradle.kts#L30)).  
 Para gerar esse header usei uma build-time dependency, [cbindgen](https://github.com/mozilla/cbindgen) para gerar automaticamente o header em C ao ler as funções e structs em Rust que são sujeitas a ser partilhadas. O header é gerado a cada build da biblioteca (ver o [ficheiro de build da biblioteca](/terminal_utils/build.rs))
 
 Ver diagrama a baixo.
