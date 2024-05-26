@@ -34,12 +34,28 @@ public final class StatisticsMenus {
         switch (option) {
             case 0 -> repairsByClient();
             case 1 -> repairsBetweenDates();
-            // case 2 -> totalRepairsPrice();
+            case 2 -> totalRepairsPrice();
             // case 3 -> repairsPriceByClient();
             // case 4 -> extremeRepairsPrice();
             // case 5 -> calculateTaxes();
             case 6 -> mainMenuInstance.mainMenu();
         }
+    }
+
+
+    private void totalRepairsPrice() {
+        var repairsSize = repairs.size();
+
+        if (repairsSize == 0) {
+            terminal.printCenteredAndWait("Não existem arranjos registados!", Color.RED, Style.BOLD);
+            mainMenuInstance.mainMenu();
+            return;
+        }
+
+        var totalRepairsPrice = repairs.stream().mapToDouble(Repair::getPrice).sum();
+
+        terminal.printCenteredAndWait("Preço total dos arranjos: " + totalRepairsPrice + "€", Color.GREEN, Style.BOLD);
+        mainMenuInstance.mainMenu();
     }
 
     private void repairsBetweenDates() {
