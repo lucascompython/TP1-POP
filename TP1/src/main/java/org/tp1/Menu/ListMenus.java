@@ -157,6 +157,8 @@ public final class ListMenus {
 
         String infoString = "Nome: " +
                 worker.getName() +
+                "\nIdade: " +
+                worker.getAge() +
                 "\nID: " +
                 worker.getId() +
                 "\nCargo: " +

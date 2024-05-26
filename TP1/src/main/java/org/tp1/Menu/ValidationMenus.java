@@ -140,4 +140,24 @@ public final class ValidationMenus {
         }
     }
 
+    static void validateAge(InputItem[] inputItems, Terminal terminal, MainMenu mainMenuInstance) {
+        while (true) {
+            try {
+                if (Integer.parseInt(inputItems[4].value) >= 18) {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                // Do nothing
+            }
+            terminal.printCenteredAndWait("Idade inválida!", Color.RED, Style.BOLD);
+            var ageInput = new InputItem("Idade", inputItems[4].value);
+            var result = terminal.inputMenu(new InputItem[] { ageInput });
+            if (!result) {
+                mainMenuInstance.mainMenu();
+                return;
+            }
+            inputItems[4].value = ageInput.value;
+        }
+    }
+
 }

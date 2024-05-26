@@ -146,6 +146,7 @@ public final class RegisterMenus {
                 new InputItem("Salário (€)", ""),
                 new InputItem("Email", ""),
                 new InputItem("Telefone", ""),
+                new InputItem("Idade", ""),
                 new InputItem("Tipo de Trabalhador", "",
                         new String[] { "Mecânico", "Gerente", "Rececionista" })
         };
@@ -156,12 +157,14 @@ public final class RegisterMenus {
             ValidationMenus.validateEmpty(inputItems, terminal, mainMenuInstance);
             ValidationMenus.validateSalary(inputItems, terminal, mainMenuInstance);
             ValidationMenus.validateEmailAndPhone(inputItems, terminal, mainMenuInstance);
+            ValidationMenus.validateAge(inputItems, terminal, mainMenuInstance);
 
             workers.add(
                     new Worker(inputItems[0].value,
-                            Role.fromString(inputItems[4].value),
+                            Role.fromString(inputItems[5].value),
                             Float.parseFloat(inputItems[1].value),
-                            new Contact(inputItems[2].value, Integer.parseInt(inputItems[3].value))));
+                            new Contact(inputItems[2].value, Integer.parseInt(inputItems[3].value)),
+                            Integer.parseInt(inputItems[4].value)));
 
             terminal.printCenteredAndWait("Trabalhador registado com sucesso!", Color.GREEN,
                     Style.BOLD);

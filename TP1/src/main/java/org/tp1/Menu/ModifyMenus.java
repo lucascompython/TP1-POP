@@ -195,6 +195,7 @@ public final class ModifyMenus {
                 new InputItem("Salário (€)", Float.toString(worker.getSalary())),
                 new InputItem("Email", worker.getContact().getEmail()),
                 new InputItem("Telefone", Integer.toString(worker.getContact().getPhone())),
+                new InputItem("Idade", Integer.toString(worker.getAge())),
                 new InputItem("Tipo de Trabalhador", worker.getRole().toNumberString(),
                         new String[] { "Mecânico", "Gerente", "Rececionista" })
         };
@@ -209,17 +210,20 @@ public final class ModifyMenus {
         ValidationMenus.validateEmailAndPhone(inputItems, terminal, mainMenuInstance);
         ValidationMenus.validateSalary(inputItems, terminal, mainMenuInstance);
         ValidationMenus.validateEmailAndPhone(inputItems, terminal, mainMenuInstance);
+        ValidationMenus.validateAge(inputItems, terminal, mainMenuInstance);
 
         var name = inputItems[0].value;
         var salary = Float.parseFloat(inputItems[1].value);
         var email = inputItems[2].value;
         var phone = Integer.parseInt(inputItems[3].value);
-        var role = Role.fromString(inputItems[4].value);
+        var age = Integer.parseInt(inputItems[4].value);
+        var role = Role.fromString(inputItems[5].value);
 
         worker.setName(name);
         worker.setSalary(salary);
         worker.getContact().setEmail(email);
         worker.getContact().setPhone(phone);
+        worker.setAge(age);
         worker.setRole(role);
 
         terminal.printCenteredAndWait("Trabalhador modificado com sucesso!", Color.GREEN, Style.BOLD);
