@@ -12,7 +12,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
 public final class ValidationMenus {
-
     static void validateEmailAndPhone(InputItem[] inputItems, Terminal terminal, MainMenu mainMenuInstance) {
         while (!Contact.validateEmail(inputItems[2].value)) {
             terminal.printCenteredAndWait("Email inválido!", Color.RED, Style.BOLD);

@@ -112,7 +112,7 @@ public final class StatisticsMenus {
 
         var totalClientRepairsPrice = clientRepairs.stream().mapToDouble(Repair::getPrice).sum();
 
-        terminal.printCenteredAndWait("Preço total dos arranjos do cliente " + client.getName() + ": " + totalClientRepairsPrice + "€", Color.GREEN, Style.BOLD);
+        terminal.printCenteredAndWait("Preço total dos arranjos do cliente " + client.getName() + ": " + mainMenuInstance.decimalFormat.format(totalClientRepairsPrice) + "€", Color.BLUE, Style.BOLD);
         mainMenuInstance.mainMenu();
     }
 
