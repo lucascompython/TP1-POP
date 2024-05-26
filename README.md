@@ -63,6 +63,7 @@ LD_LIBRARY_LOAD="." ./TP1
 ```
 
 - Ou então rodar o script `build.sh` ou `build.ps1` para compilar e rodar o programa. É preciso fazer o setup do Jextract antes de rodar o script.
+- Ao dar build os ficheiros json são resetados. Para não resetar os ficheiros json, rodar o programa sem compilar.
 
 ```bash
 # Linux
@@ -79,7 +80,7 @@ LD_LIBRARY_LOAD="." ./TP1
 ./build.ps1 -release
 
 
-# Or just run the program without compiling
+# Ou rodar o programa sem compilar
 
 # Linux
 ./run.sh
