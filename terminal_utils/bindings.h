@@ -31,8 +31,6 @@ uint8_t arrow_menu(const char *items);
 
 bool input_menu(const struct Input *inputs, uint8_t inputs_length);
 
-uint8_t search_menu(const char *items);
-
 int32_t search_menu_by_id_or_text(const struct SearchInput *items, uint8_t items_length);
 
 #endif /* BINDINGS_H */

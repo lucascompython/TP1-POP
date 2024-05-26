@@ -98,18 +98,6 @@ public final class Terminal implements AutoCloseable {
         }
     }
 
-    public byte searchMenu(String[] options) {
-        StringBuilder sb = new StringBuilder();
-        for (String option : options) {
-            sb.append(option);
-            sb.append("\n");
-        }
-
-        try (var arena = Arena.ofConfined()) {
-            return search_menu(arena.allocateFrom(sb.toString()));
-        }
-    }
-
     public int searchByIdOrNameMenu(SearchItem[] items) {
         try (var arena = Arena.ofConfined()) {
             var itemsSegment = SearchInput.allocateArray(items.length, arena);
