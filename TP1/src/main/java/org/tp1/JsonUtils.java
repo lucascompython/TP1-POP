@@ -19,7 +19,11 @@ public final class JsonUtils {
         Path path = Paths.get(filename);
         try {
             String json = Files.readString(path);
-            return JSON.parseArray(json, clazz);
+            var list = JSON.parseArray(json, clazz);
+            if (list == null) {
+                list = new ArrayList<T>();
+            }
+            return list;
         } catch (NoSuchFileException e) {
             try {
                 Files.createFile(path);
