@@ -88,9 +88,14 @@ Aqui vou mencionar algumas coisas que podem ser interessantes.
 
 ## Otimizações
 
-Um dos meus objetivos principais foi otimizar o programa ao máximo. Aqui estão algumas coisas que fiz.
+Um dos meus objetivos principais foi otimizar o programa ao máximo.  
+
+Devido à versão mínima do JDK ser 22, que ainda é muito recente, o [Proguard](https://github.com/Guardsquare/proguard) ainda não suporta o JDK 22. Sendo assim, não consegui usar o Proguard para otimizar o programa em Java.
+
+Aqui estão algumas coisas que fiz.
 
 - Usar o API FFM em vez de JNI.
 - Alocar o mínimo de memória possível. Alcançado em parte ao usar código `unsafe` em Rust para evitar cópias desnecessárias.
 - Renderizar para o terminal apenas quando é preciso. Alcançado com o uso de um buffer (macro `queue!` fornecida pelo crossterm) a dar `flush` ao `stdout` apenas quando necessário.
 - Quando possível não dar clear ao terminal. Pelo menos não dar clear a tela toda. Muitas vezes o programa consegue escrever por cima do que já está no terminal. Outras vezes, o programa consegue apagar apenas o que é preciso.
+- Usar a biblioteca [FastJson](https://github.com/alibaba/fastjson2/blob/main/README_EN.md) que é mais [rápida para JSON em Java](https://github.com/fabienrenaud/java-json-benchmark).
