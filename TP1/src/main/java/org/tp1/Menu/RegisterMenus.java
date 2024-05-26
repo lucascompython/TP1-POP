@@ -91,8 +91,8 @@ public final class RegisterMenus {
             var workerId = Integer.parseInt(inputItems[1].value.trim());
             var clientId = Integer.parseInt(inputItems[2].value.trim());
 
-            var startDate = LocalDate.parse(inputItems[5].value, mainMenuInstance.formatter);
-            var endDate = LocalDate.parse(inputItems[6].value, mainMenuInstance.formatter);
+            var startDate = LocalDate.parse(inputItems[5].value, mainMenuInstance.dateFormatter);
+            var endDate = LocalDate.parse(inputItems[6].value, mainMenuInstance.dateFormatter);
 
             repairs.add(
                     new Repair(

@@ -8,6 +8,7 @@ import org.tp1.Workshop.Client;
 import org.tp1.Workshop.Repair;
 import org.tp1.Workshop.Worker;
 
+import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -22,7 +23,8 @@ public final class MainMenu {
     private final List<Client> clients;
     private final List<Repair> repairs;
 
-    public final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    public final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    public final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
     public MainMenu(List<Worker> workers, List<Client> clients, List<Repair> repairs) {
 

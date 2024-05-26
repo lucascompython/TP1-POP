@@ -79,8 +79,8 @@ public final class ModifyMenus {
                 new InputItem("Cliente", Integer.toString(repair.getClientId()), clientsSearchItems),
                 new InputItem("Descrição", repair.getDescription()),
                 new InputItem("Preço (€)", Float.toString(repair.getPrice())),
-                new InputItem("Data de Início", repair.getEntryDate().format(mainMenuInstance.formatter)),
-                new InputItem("Data de Fim", repair.getExitDate().format(mainMenuInstance.formatter)),
+                new InputItem("Data de Início", repair.getEntryDate().format(mainMenuInstance.dateFormatter)),
+                new InputItem("Data de Fim", repair.getExitDate().format(mainMenuInstance.dateFormatter)),
                 new InputItem("Tipo de Veículo", repair.getVehicleType().toNumberString(),
                         new String[] { "Carro", "Mota", "Camião" })
         };
@@ -103,8 +103,8 @@ public final class ModifyMenus {
         var description = inputItems[3].value;
         var price = Float.parseFloat(inputItems[4].value);
 
-        var entryDate = LocalDate.parse(inputItems[5].value, mainMenuInstance.formatter);
-        var exitDate = LocalDate.parse(inputItems[6].value, mainMenuInstance.formatter);
+        var entryDate = LocalDate.parse(inputItems[5].value, mainMenuInstance.dateFormatter);
+        var exitDate = LocalDate.parse(inputItems[6].value, mainMenuInstance.dateFormatter);
 
         var vehicleType = VehicleType.fromString(inputItems[7].value);
 

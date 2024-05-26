@@ -119,8 +119,8 @@ public final class ValidationMenus {
     static void validateDates(InputItem[] inputItems, Terminal terminal, MainMenu mainMenuInstance) {
         while (true) {
             try {
-                var startDate = LocalDate.parse(inputItems[5].value, mainMenuInstance.formatter);
-                var endDate = LocalDate.parse(inputItems[6].value, mainMenuInstance.formatter);
+                var startDate = LocalDate.parse(inputItems[5].value, mainMenuInstance.dateFormatter);
+                var endDate = LocalDate.parse(inputItems[6].value, mainMenuInstance.dateFormatter);
                 if (startDate.isBefore(endDate)) {
                     break;
                 }

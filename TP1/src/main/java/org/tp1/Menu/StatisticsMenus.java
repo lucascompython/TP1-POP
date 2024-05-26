@@ -37,10 +37,32 @@ public final class StatisticsMenus {
             case 2 -> totalRepairsPrice();
              case 3 -> repairsPriceByClient();
              case 4 -> extremeRepairsPrice();
-            // case 5 -> calculateTaxes();
+             case 5 -> calculateTaxes();
             case 6 -> mainMenuInstance.mainMenu();
         }
     }
+
+    private void calculateTaxes() {
+        var repairsSize = repairs.size();
+
+        if (repairsSize == 0) {
+            terminal.printCenteredAndWait("Não existem arranjos registados!", Color.RED, Style.BOLD);
+            mainMenuInstance.mainMenu();
+            return;
+        }
+
+        var repairsUnder55 = repairs.stream().filter(repair -> repair.getPrice() < 55).toList();
+        var repairsOver55 = repairs.stream().filter(repair -> repair.getPrice() >= 55).toList();
+
+        var totalTax18 = repairsUnder55.stream().mapToDouble(repair -> repair.getPrice() * 0.18).sum();
+        var totalTax21 = repairsOver55.stream().mapToDouble(repair -> repair.getPrice() * 0.21).sum();
+
+        var infoString = "Total de imposto (18%) a pagar: " + mainMenuInstance.decimalFormat.format(totalTax18) + "€" + "\nTotal de imposto (21%) a pagar: " + mainMenuInstance.decimalFormat.format(totalTax21) + "€";
+
+        terminal.printCenteredLinesAndWait(infoString);
+        mainMenuInstance.mainMenu();
+    }
+
 
     private void extremeRepairsPrice() {
         var repairsSize = repairs.size();
@@ -54,7 +76,7 @@ public final class StatisticsMenus {
         var minRepairPrice = repairs.stream().mapToDouble(Repair::getPrice).min().orElse(0);
         var maxRepairPrice = repairs.stream().mapToDouble(Repair::getPrice).max().orElse(0);
 
-        var infoString = "Preço mínimo de um arranjo: " + minRepairPrice + "€" + "\nPreço máximo de um arranjo: " + maxRepairPrice + "€";
+        var infoString = "Preço mínimo de um arranjo: " + mainMenuInstance.decimalFormat.format(minRepairPrice) + "€" + "\nPreço máximo de um arranjo: " + mainMenuInstance.decimalFormat.format(maxRepairPrice) + "€";
 
         terminal.printCenteredLinesAndWait(infoString);
         mainMenuInstance.mainMenu();
@@ -106,7 +128,7 @@ public final class StatisticsMenus {
 
         var totalRepairsPrice = repairs.stream().mapToDouble(Repair::getPrice).sum();
 
-        terminal.printCenteredAndWait("Preço total dos arranjos: " + totalRepairsPrice + "€", Color.GREEN, Style.BOLD);
+        terminal.printCenteredAndWait("Preço total dos arranjos: " + mainMenuInstance.decimalFormat.format(totalRepairsPrice) + "€", Color.GREEN, Style.BOLD);
         mainMenuInstance.mainMenu();
     }
 
@@ -131,8 +153,8 @@ public final class StatisticsMenus {
             return;
         }
 
-        var startDate = LocalDate.parse(inputItems[0].value, mainMenuInstance.formatter);
-        var endDate = LocalDate.parse(inputItems[1].value, mainMenuInstance.formatter);
+        var startDate = LocalDate.parse(inputItems[0].value, mainMenuInstance.dateFormatter);
+        var endDate = LocalDate.parse(inputItems[1].value, mainMenuInstance.dateFormatter);
 
         var repairsBetweenDates = repairs.stream()
                 .filter(repair -> repair.getEntryDate().isAfter(startDate) && repair.getExitDate().isBefore(endDate))
