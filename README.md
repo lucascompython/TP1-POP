@@ -62,21 +62,30 @@ LD_LIBRARY_LOAD="." ./TP1
 ./TP1
 ```
 
-- Ou então rodar o script `run.sh` ou `run.ps1` para compilar e rodar o programa. É preciso fazer o setup do Jextract antes de rodar o script.
+- Ou então rodar o script `build.sh` ou `build.ps1` para compilar e rodar o programa. É preciso fazer o setup do Jextract antes de rodar o script.
 
 ```bash
+# Linux
+./build.sh
+
+# Windows
+./build.ps1
+
+# Release build
+
+# Linux
+./build.sh --release
+# Windows
+./build.ps1 -release
+
+
+# Or just run the program without compiling
+
 # Linux
 ./run.sh
 
 # Windows
 ./run.ps1
-
-# Release build
-
-# Linux
-./run.sh --release
-# Windows
-./run.ps1 -release
 ```
 
 ## Notas
