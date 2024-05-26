@@ -13,4 +13,12 @@ public enum VehicleType {
             default -> throw new IllegalArgumentException("Invalid role");
         };
     }
+
+    public String toNumberString() {
+        return switch (this) {
+            case CAR -> "0";
+            case MOTORCYCLE -> "1";
+            case TRUCK -> "2";
+        };
+    }
 }

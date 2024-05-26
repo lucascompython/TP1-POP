@@ -5,13 +5,13 @@ import java.time.LocalDate;
 public final class Repair {
     public static int count = 0;
     private final int id;
-    private final CarRegistration carRegistration;
-    private final VehicleType vehicleType;
-    private final int workerId;
-    private final int clientId;
-    private final String description;
-    private final float price;
-    private final LocalDate entryDate;
+    private CarRegistration carRegistration;
+    private VehicleType vehicleType;
+    private int workerId;
+    private int clientId;
+    private String description;
+    private float price;
+    private LocalDate entryDate;
     private LocalDate exitDate;
 
     public Repair(CarRegistration carRegistration, int workerId, int clientId, String description, float price,
@@ -65,6 +65,34 @@ public final class Repair {
 
     public void setExitDate(LocalDate exitDate) {
         this.exitDate = exitDate;
+    }
+
+    public void setCarRegistration(CarRegistration carRegistration) {
+        this.carRegistration = carRegistration;
+    }
+
+    public void setVehicleType(VehicleType vehicleType) {
+        this.vehicleType = vehicleType;
+    }
+
+    public void setWorkerId(int workerId) {
+        this.workerId = workerId;
+    }
+
+    public void setClientId(int clientId) {
+        this.clientId = clientId;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setPrice(float price) {
+        this.price = price;
+    }
+
+    public void setEntryDate(LocalDate entryDate) {
+        this.entryDate = entryDate;
     }
 
     public void print() {
