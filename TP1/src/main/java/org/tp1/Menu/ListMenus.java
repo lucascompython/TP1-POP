@@ -125,9 +125,9 @@ public final class ListMenus {
                 "\nNIF: " +
                 client.getNIF().to_string() +
                 "\nEmail: " +
-                client.getContact().email() +
+                client.getContact().getEmail() +
                 "\nTelefone: " +
-                client.getContact().phone();
+                client.getContact().getPhone();
 
         terminal.printCenteredLinesAndWait(infoString, Color.GREEN, Style.BOLD);
 
@@ -164,9 +164,9 @@ public final class ListMenus {
                 "\nSalário: " +
                 worker.getSalary() +
                 "\nEmail: " +
-                worker.getContact().email() +
+                worker.getContact().getEmail() +
                 "\nTelefone: " +
-                worker.getContact().phone();
+                worker.getContact().getPhone();
 
         terminal.printCenteredLinesAndWait(infoString, Color.GREEN, Style.BOLD);
 

@@ -2,9 +2,9 @@ package org.tp1.Workshop;
 
 public final class Worker {
     public static int count = 0;
-    private final String name;
+    private String name;
     private final int id;
-    private final Role role;
+    private Role role;
     private float salary;
     private final Contact contact;
 
@@ -38,6 +38,14 @@ public final class Worker {
 
     public void setSalary(float salary) {
         this.salary = salary;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public void print() {

@@ -25,4 +25,12 @@ public enum Role {
             case RECEPTIONIST -> "Rececionista";
         };
     }
+
+    public String toNumberString() {
+        return switch (this) {
+            case MECHANIC -> "0";
+            case MANAGER -> "1";
+            case RECEPTIONIST -> "2";
+        };
+    }
 }
