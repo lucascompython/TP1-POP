@@ -40,12 +40,15 @@ public final class RegisterMenus {
     }
 
     private void registerRepair() {
-        var workerSize = workers.size();
-        if (workerSize == 0) {
-            terminal.printCenteredAndWait("Não existem trabalhadores registados!", Color.RED, Style.BOLD);
+        var mechanics = workers.stream().filter(worker -> worker.getRole() == Role.MECHANIC).toList();
+        var mechanicSize = mechanics.size();
+
+        if (mechanicSize == 0) {
+            terminal.printCenteredAndWait("Não existem mecânicos registados!", Color.RED, Style.BOLD);
             mainMenu();
             return;
         }
+
         var clientSize = clients.size();
         if (clientSize == 0) {
             terminal.printCenteredAndWait("Não existem clientes registados!", Color.RED, Style.BOLD);
@@ -53,11 +56,12 @@ public final class RegisterMenus {
             return;
         }
 
-        SearchItem[] workersSearchItems = new SearchItem[workerSize];
-        for (int i = 0; i < workerSize; i++) {
-            var worker = workers.get(i);
-            workersSearchItems[i] = new SearchItem(worker.getId(), worker.getName());
+        SearchItem[] mechanicsSearchItems = new SearchItem[mechanicSize];
+        for (int i = 0; i < mechanicSize; i++) {
+            var mechanic = mechanics.get(i);
+            mechanicsSearchItems[i] = new SearchItem(mechanic.getId(), mechanic.getName());
         }
+
         SearchItem[] clientsSearchItems = new SearchItem[clientSize];
         for (int i = 0; i < clientSize; i++) {
             var client = clients.get(i);
@@ -66,7 +70,7 @@ public final class RegisterMenus {
 
         var inputItems = new InputItem[] {
                 new InputItem("Matrícula", ""),
-                new InputItem("Trabalhador", "", workersSearchItems),
+                new InputItem("Trabalhador", "", mechanicsSearchItems),
                 new InputItem("Cliente", "", clientsSearchItems),
                 new InputItem("Descrição", ""),
                 new InputItem("Preço (€)", ""),
