@@ -15,6 +15,7 @@ public final class MainMenu {
     private final RegisterMenus registerMenus;
     private final ListMenus listMenus;
     private final ModifyMenus modifyMenus;
+    private final StatisticsMenus statisticsMenus;
 
     private final List<Worker> workers;
     private final List<Client> clients;
@@ -32,6 +33,7 @@ public final class MainMenu {
             this.registerMenus = new RegisterMenus(this, terminal, workers, clients, repairs);
             this.listMenus = new ListMenus(this, terminal, workers, clients, repairs);
             this.modifyMenus = new ModifyMenus(this, terminal, workers, clients, repairs);
+            this.statisticsMenus = new StatisticsMenus(this, terminal, workers, clients, repairs);
 
             terminal.printCenteredAndWait("Bem vindo ao sistema de gestão da oficina!", Color.GREEN, Style.BOLD);
             mainMenu();
@@ -47,7 +49,7 @@ public final class MainMenu {
             case 0 -> registerMenus.mainMenu();
             case 1 -> modifyMenus.mainMenu();
             case 2 -> listMenus.mainMenu();
-            case 3 -> terminal.printCenteredAndWait("Gestão de Veículos", Color.GREEN, Style.BOLD);
+            case 3 -> statisticsMenus.mainMenu();
             case 4 -> {
                 terminal.close();
                 JsonUtils.writeWorkers(workers);

@@ -181,7 +181,7 @@ pub extern "C" fn print_centered_lines_and_wait(text: *const c_char) {
     }
 
     let x = (unsafe { TERM_SIZE.cols } - 39) / 2; // 39 is the length of "Pressione qualquer tecla para continuar"
-    let y = add(unsafe { TERM_SIZE.rows / 2 }, (*lines_count as i32 / 2) + 1);
+    let y = add(unsafe { TERM_SIZE.rows / 2 }, *lines_count as i32 / 2) + 1;
 
     crossterm::queue!(
         stdout,
