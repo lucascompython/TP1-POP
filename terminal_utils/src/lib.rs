@@ -310,7 +310,7 @@ fn print_menu_item(
                 "> {}{}{}: {} <",
                 style::SetAttribute(style::Attribute::Bold),
                 label,
-                style::SetAttribute(style::Attribute::NoBold),
+                style::SetAttribute(style::Attribute::Reset),
                 value,
             )
             .unwrap();
@@ -330,7 +330,7 @@ fn print_menu_item(
                 "  {}{}{}: {}  ",
                 style::SetAttribute(style::Attribute::Bold),
                 label,
-                style::SetAttribute(style::Attribute::NoBold),
+                style::SetAttribute(style::Attribute::Reset),
                 value,
             )
             .unwrap();
