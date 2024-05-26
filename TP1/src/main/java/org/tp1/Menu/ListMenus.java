@@ -92,7 +92,7 @@ public final class ListMenus {
                 "\nData de Fim: " +
                 repair.getExitDate().format(mainMenuInstance.formatter);
 
-        terminal.printCenteredLinesAndWait(infoString, Color.GREEN, Style.BOLD);
+        terminal.printCenteredLinesAndWait(infoString);
 
         mainMenuInstance.mainMenu();
 
@@ -129,7 +129,7 @@ public final class ListMenus {
                 "\nTelefone: " +
                 client.getContact().getPhone();
 
-        terminal.printCenteredLinesAndWait(infoString, Color.GREEN, Style.BOLD);
+        terminal.printCenteredLinesAndWait(infoString);
 
         mainMenuInstance.mainMenu();
 
@@ -168,7 +168,7 @@ public final class ListMenus {
                 "\nTelefone: " +
                 worker.getContact().getPhone();
 
-        terminal.printCenteredLinesAndWait(infoString, Color.GREEN, Style.BOLD);
+        terminal.printCenteredLinesAndWait(infoString);
 
         mainMenuInstance.mainMenu();
 

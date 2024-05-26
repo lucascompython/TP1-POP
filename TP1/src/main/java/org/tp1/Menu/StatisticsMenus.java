@@ -36,10 +36,28 @@ public final class StatisticsMenus {
             case 1 -> repairsBetweenDates();
             case 2 -> totalRepairsPrice();
              case 3 -> repairsPriceByClient();
-            // case 4 -> extremeRepairsPrice();
+             case 4 -> extremeRepairsPrice();
             // case 5 -> calculateTaxes();
             case 6 -> mainMenuInstance.mainMenu();
         }
+    }
+
+    private void extremeRepairsPrice() {
+        var repairsSize = repairs.size();
+
+        if (repairsSize == 0) {
+            terminal.printCenteredAndWait("Não existem arranjos registados!", Color.RED, Style.BOLD);
+            mainMenuInstance.mainMenu();
+            return;
+        }
+
+        var minRepairPrice = repairs.stream().mapToDouble(Repair::getPrice).min().orElse(0);
+        var maxRepairPrice = repairs.stream().mapToDouble(Repair::getPrice).max().orElse(0);
+
+        var infoString = "Preço mínimo de um arranjo: " + minRepairPrice + "€" + "\nPreço máximo de um arranjo: " + maxRepairPrice + "€";
+
+        terminal.printCenteredLinesAndWait(infoString);
+        mainMenuInstance.mainMenu();
     }
 
 
@@ -167,7 +185,7 @@ public final class StatisticsMenus {
                 "\nData de Fim: " +
                 repair.getExitDate().toString();
 
-        terminal.printCenteredLinesAndWait(infoString, Color.GREEN, Style.BOLD);
+        terminal.printCenteredLinesAndWait(infoString);
         mainMenuInstance.mainMenu();
     }
 
@@ -236,7 +254,7 @@ public final class StatisticsMenus {
                 "\nData de Fim: " +
                 repair.getExitDate().toString();
 
-        terminal.printCenteredLinesAndWait(infoString, Color.GREEN, Style.BOLD);
+        terminal.printCenteredLinesAndWait(infoString);
         mainMenuInstance.mainMenu();
     }
 

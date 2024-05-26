@@ -31,7 +31,7 @@ public final class Terminal implements AutoCloseable {
         }
     }
 
-    public void printCenteredLinesAndWait(String str, Color color, Style style) {
+    public void printCenteredLinesAndWait(String str) {
         try (var arena = Arena.ofConfined()) {
             print_centered_lines_and_wait(arena.allocateFrom(str));
         }
