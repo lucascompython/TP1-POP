@@ -83,7 +83,6 @@ public final class RegisterMenus {
         var result = terminal.inputMenu(inputItems);
 
         if (result) {
-            // TODO: Maybe make the validation methods return a value
             ValidationMenus.validateEmpty(inputItems, terminal, mainMenuInstance);
             ValidationMenus.validatePrice(inputItems, terminal, mainMenuInstance);
             ValidationMenus.validateCarRegistration(inputItems, terminal, mainMenuInstance);
