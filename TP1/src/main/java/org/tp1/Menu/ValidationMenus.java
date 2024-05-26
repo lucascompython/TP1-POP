@@ -106,7 +106,7 @@ public final class ValidationMenus {
     static void validateCarRegistration(InputItem[] inputItems, Terminal terminal, MainMenu mainMenuInstance) {
         while (!CarRegistration.validateRegistration(inputItems[0].value)) {
             terminal.printCenteredAndWait("Matrícula inválida!", Color.RED, Style.BOLD);
-            var registrationInput = new InputItem("Matrícula", inputItems[0].value);
+            var registrationInput = new InputItem("Matrícula (AA-11-BB)", inputItems[0].value);
             var result = terminal.inputMenu(new InputItem[] { registrationInput });
             if (!result) {
                 mainMenuInstance.mainMenu();

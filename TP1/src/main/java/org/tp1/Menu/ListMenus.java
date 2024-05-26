@@ -5,21 +5,26 @@ import org.tp1.TerminalUtils.SearchItem;
 import org.tp1.TerminalUtils.Style;
 import org.tp1.TerminalUtils.Terminal;
 import org.tp1.Workshop.Client;
+import org.tp1.Workshop.Repair;
 import org.tp1.Workshop.Worker;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class ListMenus {
     private final Terminal terminal;
     private final MainMenu mainMenuInstance;
     private final List<Worker> workers;
     private final List<Client> clients;
+    private final List<Repair> repairs;
 
-    ListMenus(MainMenu mainMenuInstance, Terminal terminal, List<Worker> workers, List<Client> clients) {
+    ListMenus(MainMenu mainMenuInstance, Terminal terminal, List<Worker> workers, List<Client> clients,
+            List<Repair> repairs) {
         this.mainMenuInstance = mainMenuInstance;
         this.terminal = terminal;
         this.workers = workers;
         this.clients = clients;
+        this.repairs = repairs;
     }
 
     void mainMenu() {
@@ -32,10 +37,65 @@ public final class ListMenus {
 
             case 1 -> listClient();
 
-            case 2 -> terminal.printCenteredAndWait("Listar Arranjo", Color.GREEN, Style.BOLD);
+            case 2 -> listRepair();
 
             case 3 -> mainMenuInstance.mainMenu();
         }
+    }
+
+    private void listRepair() {
+        var repairsSize = repairs.size();
+
+        if (repairsSize == 0) {
+            terminal.printCenteredAndWait("Não existem arranjos registados!", Color.RED, Style.BOLD);
+            mainMenuInstance.mainMenu();
+            return;
+        }
+
+        SearchItem[] searchItems = new SearchItem[repairsSize];
+
+        for (int i = 0; i < repairsSize; i++) {
+            var repair = repairs.get(i);
+            searchItems[i] = new SearchItem(repair.getClientId(), repair.getCarRegistration().registration());
+        }
+
+        var repairIndex = terminal.searchByIdOrNameMenu(searchItems);
+
+        var repair = repairs.get(repairIndex);
+
+        String infoString = "Matrícula: " +
+                repair.getCarRegistration().registration() +
+                "\nID: " +
+                repair.getId() +
+                "\nTipo de Veículo: " +
+                repair.getVehicleType().toString() +
+                "\nMecânico: " +
+                Objects.requireNonNull(workers.stream().filter(worker -> worker.getId() == repair.getWorkerId())
+                        .findFirst().orElse(null)).getName()
+                +
+                " (" +
+                repair.getWorkerId() +
+                ")" +
+                "\nCliente: " +
+                Objects.requireNonNull(clients.stream().filter(client -> client.getId() == repair.getClientId())
+                        .findFirst().orElse(null)).getName()
+                +
+                " (" +
+                repair.getClientId() +
+                ")" +
+                "\nDescrição: " +
+                repair.getDescription() +
+                "\nPreço: " +
+                repair.getPrice() +
+                "\nData de Início: " +
+                repair.getEntryDate().toString() +
+                "\nData de Fim: " +
+                repair.getExitDate().toString();
+
+        terminal.printCenteredLinesAndWait(infoString, Color.GREEN, Style.BOLD);
+
+        mainMenuInstance.mainMenu();
+
     }
 
     private void listClient() {
