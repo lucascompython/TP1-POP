@@ -22,6 +22,11 @@ java {
     targetCompatibility = JavaVersion.VERSION_22
 }
 
+dependencies {
+    implementation("com.alibaba.fastjson2:fastjson2:2.0.50")
+
+}
+
 tasks.register<Exec>("jextract") {
     val ext = if (Os.isFamily(Os.FAMILY_WINDOWS)) ".bat" else ""
 

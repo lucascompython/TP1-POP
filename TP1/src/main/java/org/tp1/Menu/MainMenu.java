@@ -1,5 +1,6 @@
 package org.tp1.Menu;
 
+import org.tp1.JsonUtils;
 import org.tp1.TerminalUtils.Color;
 import org.tp1.TerminalUtils.Style;
 import org.tp1.TerminalUtils.Terminal;
@@ -15,7 +16,15 @@ public final class MainMenu {
     private final ListMenus listMenus;
     private final ModifyMenus modifyMenus;
 
+    private final List<Worker> workers;
+    private final List<Client> clients;
+    private final List<Repair> repairs;
+
     public MainMenu(List<Worker> workers, List<Client> clients, List<Repair> repairs) {
+
+        this.workers = workers;
+        this.clients = clients;
+        this.repairs = repairs;
 
         try (var terminal = new Terminal()) {
             this.terminal = terminal;
@@ -41,6 +50,9 @@ public final class MainMenu {
             case 3 -> terminal.printCenteredAndWait("Gestão de Veículos", Color.GREEN, Style.BOLD);
             case 4 -> {
                 terminal.close();
+                JsonUtils.writeWorkers(workers);
+                JsonUtils.writeClients(clients);
+                JsonUtils.writeRepairs(repairs);
                 System.exit(0);
             } // exit
 

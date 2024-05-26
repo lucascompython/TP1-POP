@@ -21,4 +21,13 @@ public enum VehicleType {
             case TRUCK -> "2";
         };
     }
+
+    @Override
+    public String toString() {
+        return switch (this) {
+            case CAR -> "Carro";
+            case MOTORCYCLE -> "Motociclo";
+            case TRUCK -> "Camião";
+        };
+    }
 }

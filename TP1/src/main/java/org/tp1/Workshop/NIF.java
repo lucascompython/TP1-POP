@@ -29,4 +29,8 @@ public final class NIF {
     public void print() {
         System.out.println("NIF [nif=" + nif + "]");
     }
+
+    public String getNIF() {
+        return nif;
+    }
 }
