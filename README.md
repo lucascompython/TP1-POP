@@ -90,7 +90,7 @@ Aqui vou mencionar algumas coisas que podem ser interessantes.
 
 Um dos meus objetivos principais foi otimizar o programa ao máximo.  
 
-Devido à versão mínima do JDK ser 22, que ainda é muito recente, o [Proguard](https://github.com/Guardsquare/proguard) ainda não suporta o JDK 22. Sendo assim, não consegui usar o Proguard para otimizar o programa em Java.
+Devido à versão mínima do JDK ser 22 neste projeto (que ainda é muito recente), o [Proguard](https://github.com/Guardsquare/proguard) ainda não suporta o JDK 22. Senão, teria usado o Proguard para otimizar ainda mais o programa em Java.
 
 Aqui estão algumas coisas que fiz.
 
