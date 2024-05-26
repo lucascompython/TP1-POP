@@ -8,6 +8,7 @@ import org.tp1.Workshop.Client;
 import org.tp1.Workshop.Repair;
 import org.tp1.Workshop.Worker;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public final class MainMenu {
@@ -20,6 +21,8 @@ public final class MainMenu {
     private final List<Worker> workers;
     private final List<Client> clients;
     private final List<Repair> repairs;
+
+    public final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public MainMenu(List<Worker> workers, List<Client> clients, List<Repair> repairs) {
 

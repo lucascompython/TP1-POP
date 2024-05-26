@@ -4,7 +4,6 @@ import org.tp1.TerminalUtils.*;
 import org.tp1.Workshop.*;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public final class RegisterMenus {
@@ -92,9 +91,8 @@ public final class RegisterMenus {
             var workerId = Integer.parseInt(inputItems[1].value.trim());
             var clientId = Integer.parseInt(inputItems[2].value.trim());
 
-            var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-            var startDate = LocalDate.parse(inputItems[5].value, formatter);
-            var endDate = LocalDate.parse(inputItems[6].value, formatter);
+            var startDate = LocalDate.parse(inputItems[5].value, mainMenuInstance.formatter);
+            var endDate = LocalDate.parse(inputItems[6].value, mainMenuInstance.formatter);
 
             repairs.add(
                     new Repair(

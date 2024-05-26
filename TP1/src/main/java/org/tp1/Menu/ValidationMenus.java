@@ -117,11 +117,10 @@ public final class ValidationMenus {
     }
 
     static void validateDates(InputItem[] inputItems, Terminal terminal, MainMenu mainMenuInstance) {
-        var formatter = java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy");
         while (true) {
             try {
-                var startDate = LocalDate.parse(inputItems[5].value, formatter);
-                var endDate = LocalDate.parse(inputItems[6].value, formatter);
+                var startDate = LocalDate.parse(inputItems[5].value, mainMenuInstance.formatter);
+                var endDate = LocalDate.parse(inputItems[6].value, mainMenuInstance.formatter);
                 if (startDate.isBefore(endDate)) {
                     break;
                 }

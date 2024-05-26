@@ -3,6 +3,7 @@ package org.tp1.Menu;
 import org.tp1.TerminalUtils.*;
 import org.tp1.Workshop.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public final class ModifyMenus {
@@ -30,14 +31,13 @@ public final class ModifyMenus {
         switch (modifyOption) {
             case 0 -> modifyWorker();
 
-             case 1 -> modifyClient();
+            case 1 -> modifyClient();
 
-             case 2 -> modifyRepair();
+            case 2 -> modifyRepair();
 
             case 3 -> mainMenuInstance.mainMenu();
         }
     }
-
 
     private void modifyRepair() {
         var repairsSize = repairs.size();
@@ -53,7 +53,6 @@ public final class ModifyMenus {
             var repair = repairs.get(i);
             repairsSearchItems[i] = new SearchItem(repair.getId(), repair.getCarRegistration().registration());
         }
-
 
         var repairIndex = terminal.searchByIdOrNameMenu(repairsSearchItems);
 
@@ -74,16 +73,14 @@ public final class ModifyMenus {
             clientsSearchItems[i] = new SearchItem(client.getId(), client.getName());
         }
 
-        var formatter = java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
         var inputItems = new InputItem[] {
                 new InputItem("Matrícula", repair.getCarRegistration().registration()),
                 new InputItem("Trabalhador", Integer.toString(repair.getWorkerId()), mechanicsSearchItems),
                 new InputItem("Cliente", Integer.toString(repair.getClientId()), clientsSearchItems),
                 new InputItem("Descrição", repair.getDescription()),
                 new InputItem("Preço (€)", Float.toString(repair.getPrice())),
-                new InputItem("Data de Início", repair.getEntryDate().format(formatter)),
-                new InputItem("Data de Fim", repair.getExitDate().format(formatter)),
+                new InputItem("Data de Início", repair.getEntryDate().format(mainMenuInstance.formatter)),
+                new InputItem("Data de Fim", repair.getExitDate().format(mainMenuInstance.formatter)),
                 new InputItem("Tipo de Veículo", repair.getVehicleType().toNumberString(),
                         new String[] { "Carro", "Mota", "Camião" })
         };
@@ -106,8 +103,8 @@ public final class ModifyMenus {
         var description = inputItems[3].value;
         var price = Float.parseFloat(inputItems[4].value);
 
-        var entryDate = java.time.LocalDate.parse(inputItems[5].value, formatter);
-        var exitDate = java.time.LocalDate.parse(inputItems[6].value, formatter);
+        var entryDate = LocalDate.parse(inputItems[5].value, mainMenuInstance.formatter);
+        var exitDate = LocalDate.parse(inputItems[6].value, mainMenuInstance.formatter);
 
         var vehicleType = VehicleType.fromString(inputItems[7].value);
 
@@ -173,7 +170,6 @@ public final class ModifyMenus {
         terminal.printCenteredAndWait("Cliente modificado com sucesso!", Color.GREEN, Style.BOLD);
         mainMenuInstance.mainMenu();
     }
-
 
     private void modifyWorker() {
         var workersSize = workers.size();

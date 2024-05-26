@@ -1,13 +1,11 @@
 package org.tp1.Menu;
 
-import org.tp1.TerminalUtils.Color;
-import org.tp1.TerminalUtils.SearchItem;
-import org.tp1.TerminalUtils.Style;
-import org.tp1.TerminalUtils.Terminal;
+import org.tp1.TerminalUtils.*;
 import org.tp1.Workshop.Client;
 import org.tp1.Workshop.Repair;
 import org.tp1.Workshop.Worker;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,13 +33,92 @@ public final class StatisticsMenus {
 
         switch (option) {
             case 0 -> repairsByClient();
-//            case 1 -> repairsBetweenDates();
-//            case 2 -> totalRepairsPrice();
-//            case 3 -> repairsPriceByClient();
-//            case 4 -> extremeRepairsPrice();
-//            case 5 -> calculateTaxes();
+            case 1 -> repairsBetweenDates();
+            // case 2 -> totalRepairsPrice();
+            // case 3 -> repairsPriceByClient();
+            // case 4 -> extremeRepairsPrice();
+            // case 5 -> calculateTaxes();
             case 6 -> mainMenuInstance.mainMenu();
         }
+    }
+
+    private void repairsBetweenDates() {
+        var repairsSize = repairs.size();
+
+        if (repairsSize == 0) {
+            terminal.printCenteredAndWait("Não existem arranjos registados!", Color.RED, Style.BOLD);
+            mainMenuInstance.mainMenu();
+            return;
+        }
+
+        InputItem[] inputItems = new InputItem[] {
+                new InputItem("Data de Início (dd-MM-yyyy)", ""),
+                new InputItem("Data de Fim (dd-MM-yyyy)", "")
+        };
+
+        var result = terminal.inputMenu(inputItems);
+
+        if (!result) {
+            mainMenuInstance.mainMenu();
+            return;
+        }
+
+        var startDate = LocalDate.parse(inputItems[0].value, mainMenuInstance.formatter);
+        var endDate = LocalDate.parse(inputItems[1].value, mainMenuInstance.formatter);
+
+        var repairsBetweenDates = repairs.stream()
+                .filter(repair -> repair.getEntryDate().isAfter(startDate) && repair.getExitDate().isBefore(endDate))
+                .toList();
+        var repairsBetweenDatesSize = repairsBetweenDates.size();
+
+        if (repairsBetweenDates.isEmpty()) {
+            terminal.printCenteredAndWait("Não existem arranjos entre as datas especificadas!", Color.RED, Style.BOLD);
+            mainMenuInstance.mainMenu();
+            return;
+        }
+
+        SearchItem[] repairsSearchItems = new SearchItem[repairsBetweenDatesSize];
+        for (int i = 0; i < repairsBetweenDatesSize; i++) {
+            var repair = repairsBetweenDates.get(i);
+            repairsSearchItems[i] = new SearchItem(repair.getId(), repair.getCarRegistration().registration());
+        }
+
+        var repairIndex = terminal.searchByIdOrNameMenu(repairsSearchItems);
+
+        var repair = repairsBetweenDates.get(repairIndex);
+
+        String infoString = "Matrícula: " +
+                repair.getCarRegistration().registration() +
+                "\nID: " +
+                repair.getId() +
+                "\nTipo de Veículo: " +
+                repair.getVehicleType().toString() +
+                "\nMecânico: " +
+                Objects.requireNonNull(workers.stream().filter(worker -> worker.getId() == repair.getWorkerId())
+                        .findFirst().orElse(null)).getName()
+                +
+                " (" +
+                repair.getWorkerId() +
+                ")" +
+                "\nCliente: " +
+                Objects.requireNonNull(clients.stream().filter(client -> client.getId() == repair.getClientId())
+                        .findFirst().orElse(null)).getName()
+                +
+                " (" +
+                repair.getClientId() +
+                ")" +
+                "\nDescrição: " +
+                repair.getDescription() +
+                "\nPreço: " +
+                repair.getPrice() +
+                "€" +
+                "\nData de Início: " +
+                repair.getEntryDate().toString() +
+                "\nData de Fim: " +
+                repair.getExitDate().toString();
+
+        terminal.printCenteredLinesAndWait(infoString, Color.GREEN, Style.BOLD);
+        mainMenuInstance.mainMenu();
     }
 
     private void repairsByClient() {
@@ -88,7 +165,9 @@ public final class StatisticsMenus {
                 "\nTipo de Veículo: " +
                 repair.getVehicleType().toString() +
                 "\nMecânico: " +
-                Objects.requireNonNull(workers.stream().filter(worker -> worker.getId() == repair.getWorkerId()).findFirst().orElse(null)).getName() +
+                Objects.requireNonNull(workers.stream().filter(worker -> worker.getId() == repair.getWorkerId())
+                        .findFirst().orElse(null)).getName()
+                +
                 " (" +
                 repair.getWorkerId() +
                 ")" +

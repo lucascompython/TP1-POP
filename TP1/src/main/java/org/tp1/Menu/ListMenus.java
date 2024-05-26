@@ -88,9 +88,9 @@ public final class ListMenus {
                 "\nPreço: " +
                 repair.getPrice() +
                 "\nData de Início: " +
-                repair.getEntryDate().toString() +
+                repair.getEntryDate().format(mainMenuInstance.formatter) +
                 "\nData de Fim: " +
-                repair.getExitDate().toString();
+                repair.getExitDate().format(mainMenuInstance.formatter);
 
         terminal.printCenteredLinesAndWait(infoString, Color.GREEN, Style.BOLD);
 
