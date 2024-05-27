@@ -1,12 +1,6 @@
 package org.tp1.Workshop;
 
-public final class NIF {
-
-    private final String nif;
-
-    public NIF(String nif) {
-        this.nif = nif;
-    }
+public record NIF(String nif) {
 
     public static boolean validate(String number) {
         final int max = 9;
@@ -20,10 +14,6 @@ public final class NIF {
         if (checkDigit > 9)
             checkDigit = 0;
         return checkDigit == number.charAt(max - 1) - '0';
-    }
-
-    public String getNif() {
-        return nif;
     }
 
     public void print() {
