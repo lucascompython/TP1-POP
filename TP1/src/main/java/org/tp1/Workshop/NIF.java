@@ -22,7 +22,7 @@ public final class NIF {
         return checkDigit == number.charAt(max - 1) - '0';
     }
 
-    public String to_string() {
+    public String getNif() {
         return nif;
     }
 
@@ -30,7 +30,4 @@ public final class NIF {
         System.out.println("NIF [nif=" + nif + "]");
     }
 
-    public String getNIF() {
-        return nif;
-    }
 }

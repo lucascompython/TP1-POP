@@ -142,7 +142,7 @@ public final class ModifyMenus {
 
         var inputItems = new InputItem[] {
                 new InputItem("Nome", client.getName()),
-                new InputItem("NIF", client.getNIF().to_string()),
+                new InputItem("NIF", client.getNIF().getNif()),
                 new InputItem("Email", client.getContact().getEmail()),
                 new InputItem("Telefone", Integer.toString(client.getContact().getPhone()))
         };

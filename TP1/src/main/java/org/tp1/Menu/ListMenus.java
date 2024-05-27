@@ -123,7 +123,7 @@ public final class ListMenus {
                 "\nID: " +
                 client.getId() +
                 "\nNIF: " +
-                client.getNIF().to_string() +
+                client.getNIF().getNif() +
                 "\nEmail: " +
                 client.getContact().getEmail() +
                 "\nTelefone: " +
